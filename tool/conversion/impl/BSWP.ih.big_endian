@@ -1,0 +1,336 @@
+#ifndef   BSWP_IH_BIG_ENDIAN
+#define   BSWP_IH_BIG_ENDIAN
+
+/* ---------------------------------------------------------------------- *//*!
+  
+  \file   BSWP.ih.big_endian
+  \brief  Implements the big endian versions of the BSWP routines.
+  \author JJRussell - russell@slac.stanford.edu
+  
+\verbatim
+
+    CVS $Id: BSWP.ih.big_endian,v 1.2 2004/12/07 16:13:06 russell Exp $
+\endverbatim
+
+
+   This portion of the BSWP.ih file was split off for managerial and
+   user impact reasons. As one can see, it is fairly large, and, as
+   one might expect, there is a very similar looking file for the
+   little endian implementation. By splitting these off, the poor user
+   who includes the BSWP.ih will only have half as many lines pulled
+   into his file. Hopefully the smaller size include files will benefit
+   both the maintainers of the BSWP.ih and its users.
+
+                                                                          */
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ------------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP16_LCLXLITTLE)|| !defined(BSWP__SELECT)
+BSWP__EXP_FNC unsigned int BSWP__swap16_lclXlittle (uint16_t val)
+                         { return BSWP__swap16 (val); }
+#endif
+
+#if               defined (BSWP__SWAP16_LCLXBIG)   || !defined(BSWP__SELECT)
+BSWP__EXP_FNC unsigned int BSWP__swap16_lclXbig    (uint16_t val)
+                         { return val; }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP16L)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC unsigned int BSWP__swap16l (uint16_t val)
+                         { return BSWP__swap16 (val); }
+#endif
+
+#if               defined (BSWP__SWAP16B)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC unsigned int BSWP__swap16b (uint16_t val)
+                         { return val; }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__LOAD16L)           || !defined(BSWP__SELECT)
+BSWP__EXP_FNC  unsigned int BSWP__load16l (const uint16_t *src)
+                         { return BSWP__load16 (src); } 
+#endif
+
+#if                defined(BSWP__LOAD16B)           || !defined(BSWP__SELECT)
+BSWP__EXP_FNC  unsigned int BSWP__load16b (const uint16_t *src)
+                         { return src[0]; } 
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__LOAD16LX)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC unsigned int BSWP__load16lx (const uint16_t *src,
+                                           unsigned int           offset)
+                         { return BSWP__load16x (src, offset); }
+#endif
+
+#if                defined(BSWP__LOAD16BX)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC unsigned int BSWP__load16bx (const uint16_t *src,
+                                           unsigned int           offset)
+        { return ((uint16_t *)((unsigned char *)src + offset))[0]; } 
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__STORE16L)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store16l (uint16_t *dst,
+                                   uint16_t  val)
+        { BSWP__store16 (dst, val);  return; }
+#endif
+
+#if                defined(BSWP__STORE16B)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store16b (uint16_t *dst,
+                                   uint16_t  val)
+        { dst[0] = val; return;  }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__STORE16LX)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store16lx (uint16_t *dst,
+				    unsigned int     offset,
+                                    uint16_t  val)
+        { BSWP__store16x (dst, offset, val);  return; }
+#endif
+
+#if                defined(BSWP__STORE16BX)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store16bx (uint16_t *dst,
+				    unsigned int     offset,
+                                    uint16_t  val)
+        { 
+           ((uint16_t *)((unsigned char *)dst + offset))[0] = val;
+           return; 
+        }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP32_LCLXLITTLE) || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint32_t BSWP__swap32_lclXlittle (uint32_t val) 
+                         { return BSWP__swap32 (val); }
+#endif
+
+#if               defined (BSWP__SWAP32_LCLXBIG)    || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint32_t BSWP__swap32_lclXbig (uint32_t val) 
+                         { return val; }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP32L)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint32_t BSWP__swap32l (uint32_t val)
+                         { return BSWP__swap32 (val); }
+#endif
+
+#if               defined (BSWP__SWAP32B)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint32_t BSWP__swap32b (uint32_t val)
+                         { return val; }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__LOAD32L)           || !defined(BSWP__SELECT)
+BSWP__EXP_FNC  uint32_t BSWP__load32l (const uint32_t *src)
+                         { return BSWP__load32 (src); } 
+#endif
+
+#if                defined(BSWP__LOAD32B)           || !defined(BSWP__SELECT)
+BSWP__EXP_FNC  uint32_t BSWP__load32b (const uint32_t *src)
+                         { return src[0]; } 
+
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__LOAD32LX)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint32_t BSWP__load32lx (const uint32_t *src,
+                                           unsigned int     offset)
+                         { return BSWP__load32x (src, offset); }
+#endif
+
+#if                defined(BSWP__LOAD32BX)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint32_t BSWP__load32bx (const uint32_t *src,
+                                           unsigned int     offset)
+        { return ((uint32_t *) ((unsigned char *)src + offset))[0]; } 
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__STORE32L)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store32l (uint32_t *dst,
+                                   uint32_t  val)
+        { BSWP__store32 (dst, val);  return; }
+#endif
+
+#if                defined(BSWP__STORE32B)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store32b (uint32_t *dst,
+                                   uint32_t  val)
+        { dst[0] = val; return;  }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__STORE32LX)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store32lx(uint32_t   *dst,
+				   unsigned int offset,
+                                   uint32_t    val)
+        { BSWP__store32x (dst, offset, val);  return; }
+#endif
+
+#if                defined(BSWP__STORE32BX)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store32bx(uint32_t   *dst,
+				   unsigned int offset,
+                                   uint32_t    val)
+        { 
+           ((uint32_t *)((unsigned char *)dst + offset))[0] = val;
+           return; 
+        }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP64_LCLXLITTLE) || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint64_t 
+                           BSWP__swap64_lclXlittle(uint64_t val) 
+                           { return BSWP__swap64 (val); }
+#endif
+
+#if               defined (BSWP__SWAP64_LCLXBIG)    || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint64_t 
+                           BSWP__swap64_lclXbig (uint64_t val) 
+                                                 { return val; }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP64L)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint64_t BSWP__swap64l (uint64_t val)
+                         { return BSWP__swap64 (val); }
+#endif
+
+#if               defined (BSWP__SWAP64B)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint64_t BSWP__swap64b (uint64_t val)
+                         { return val; }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__LOAD64L)           || !defined(BSWP__SELECT)
+BSWP__EXP_FNC  uint64_t 
+                           BSWP__load64l (const uint64_t *src)
+                         { return BSWP__load64 (src); } 
+#endif
+
+#if                defined(BSWP__LOAD64B)           || !defined(BSWP__SELECT)
+BSWP__EXP_FNC  uint64_t
+                           BSWP__load64b (const uint64_t *src)
+                         { return src[0]; } 
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__LOAD64LX)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint64_t 
+                           BSWP__load64lx (const uint64_t *src,
+                                           unsigned int           offset)
+                         { return BSWP__load64x (src, offset); }
+#endif
+
+#if                defined(BSWP__LOAD64BX)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC uint64_t 
+                           BSWP__load64bx (const uint64_t *src,
+                                           unsigned int               offset)
+     { return ((uint64_t *)((unsigned char *)src + offset))[0];} 
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__STORE64L)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store64l (uint64_t *dst,
+                                   uint64_t  val)
+        { BSWP__store64 (dst, val);  return; }
+#endif
+
+#if                defined(BSWP__STORE64B)          || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store64b (uint64_t *dst,
+                                   uint64_t  val)
+        { dst[0] = val; return;  }
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- */
+#if                defined(BSWP__STORE64LX)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store64lx(uint64_t *dst,
+				   unsigned int         offset,
+                                   uint64_t  val)
+        { BSWP__store64x (dst, offset, val);  return; }
+#endif
+
+
+#if                defined(BSWP__STORE64BX)         || !defined(BSWP__SELECT)
+BSWP__EXP_FNC void BSWP__store64bx(uint64_t *dst,
+				   unsigned int         offset,
+                                   uint64_t  val)
+        { 
+           ((uint64_t *)((unsigned char *)dst+offset))[0] = val;
+           return; 
+        }
+#endif
+/* ------------------------------------------------------------------------- */
+
+#endif

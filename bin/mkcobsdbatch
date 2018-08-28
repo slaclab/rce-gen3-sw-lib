@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+# Batch create a COBs worth of SD flashes
+# DTM always uses device sdd
+# sudo ./mkcobsdbatch
+#
+#
+
+usage()
+{
+    echo ""
+    echo "Usage: sudo mkcobsdbatch"
+    echo ""
+    echo "Formats 9 SD cards to fully populate a COB (must be run as sudo on rddev109)."
+    echo "The DTM card is always located in the SD reader slot with label 'sdd'."
+    echo "All 9 SD reader slots must be populated with 32Gb cards."
+    echo ""
+    echo "Formatting for all 9 cards is executed in parallel."
+    echo "Expect 10 minutes total time for all cards to finish."
+    echo ""
+    echo ""
+    exit 0
+}
+
+#Check if executing as root
+if ! [ "$(whoami)" = "root" ] ; then
+	echo "You must be sudo to run mkcobsdbatch!"
+    usage
+fi
+
+mkrcesd sdd dtm --mac 00:00:00:00:00:00&
+mkrcesd sdf dpm --mac 00:00:00:00:00:00&
+mkrcesd sdj dpm --mac 00:00:00:00:00:00&
+mkrcesd sdl dpm --mac 00:00:00:00:00:00&
+mkrcesd sdn dpm --mac 00:00:00:00:00:00&
+mkrcesd sdp dpm --mac 00:00:00:00:00:00&
+mkrcesd sdr dpm --mac 00:00:00:00:00:00&
+mkrcesd sdt dpm --mac 00:00:00:00:00:00&
+mkrcesd sdv dpm --mac 00:00:00:00:00:00&

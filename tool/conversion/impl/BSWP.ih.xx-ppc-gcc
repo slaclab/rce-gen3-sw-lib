@@ -1,0 +1,402 @@
+#ifndef BSWP_IH_XX_PPC_GCC
+#define BSWP_IH_XX_PPC_GCC
+
+/* ---------------------------------------------------------------------- *//*!
+  
+  \file   BSWP.ih.xx-ppc-gcc
+  \brief  Implements the PPC/GCC version of the inline BSWP routines.
+  \author JJRussell - russell@slac.stanford.edu
+  
+\verbatim
+
+    CVS $Id: BSWP.ih.xx-ppc-gcc,v 1.3 2004/12/07 16:13:06 russell Exp $
+\endverbatim
+                                                                          */
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined(BSWP__SWAP16)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC unsigned int BSWP__swap16 (uint16_t val)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped version of the specified value. Note that this
+   version byteswaps in an register so the lhrbx is not available.
+
+   PARAMETERS
+   ----------
+          val: The short value to be byte swapped
+          
+   RETURNS
+   -------
+   The byteswapped value
+*/   
+{
+   unsigned int tmp;
+
+  
+   /* For the comments below the bytes are 0 1 2 3, ie byte 0 in the MSB */
+
+   /*
+    | The asm code implements the following sequence in about half the
+    | instructions. I have had trouble with embedding asms with read-modify
+    | -write registers (which is the way the rlwimi instructions treats
+    | its output register). I have not had this problem when the instructions
+    | are contained in a single sequence and protected with a volatile.
+    | The volatile effectively tells the optimizer to keep its hands off.
+    | 
+    |  tmp  = (val & 0x000000ff) <<  8;   /- Byte 3 => Byte 2 -/
+    |  tmp |= (val & 0x0000ff00) <<  8;   /- Byte 2 => Byte 3 -/
+   */  
+   asm volatile ("rlwinm %0,%1,8,16,23"  : "=r"(tmp) : "r"(val)); /* B3=>B2 */
+   asm volatile ("rlwimi %0,%1,24,24,31" : "=r"(tmp) : "r"(val),"0"(tmp));
+
+   return tmp;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD16)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC unsigned int BSWP__load16 (const uint16_t *src)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 16 bit word from the specified address using the
+   PowerPCs lwarx instruction.
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   unsigned int val;
+   asm ("lhbrx  %0,0,%1": "=r"((unsigned int)val) : "r"(src));
+   return val;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD16X)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC unsigned int BSWP__load16x (const uint16_t *src,
+                                                unsigned       int  offset)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 16 bit word from the specified address using the
+   PowerPCs lhbrx instruction. The byte offset to be applied must be a
+   variable (ie accessible in a register), not a constant. 
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+       offset: The byte offset
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   unsigned int val;
+
+   /* 
+    | Note that the offset register must be specified with a 'b' constraint
+    | If it is not, the compiler is free to chose any general purpose
+    | register, including r0. For this instruction, when r0 is used as
+    | the index register, it is treated as a source of 0; not good.
+   */
+   asm ("lhbrx  %0,%1,%2": "=r"((unsigned int)val) : "b"(offset), "r"(src));
+   return val;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE16)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store16 (uint16_t *dst,
+                                  uint16_t  val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 32 bit word value to the specified address using the
+   PowerPCs sthbrx instruction.
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+          val: The value to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+   asm ("sthbrx  %1,0,%0":: "r"(dst),"r"(val));
+   return;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE16X)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store16x (uint16_t   *dst,
+                                   unsigned       int offset,
+                                   uint16_t    val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 32 bit word value to the specified address using the
+   PowerPCs sthbrx instruction. A byte offset is applied to the destination
+   address. The byte offset to be applied must be a variable (ie accessible
+   in a register), not a constant. 
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+       offset: A byte offset to apply to the destination address
+
+          val: The value to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+   /* 
+    | Note that the offset register must be specified with a 'b' constraint
+    | If it is not, the compiler is free to chose any general purpose
+    | register, including r0. For this instruction, when r0 is used as
+    | the index register, it is treated as a source of 0; not good.
+   */
+   asm ("sthbrx  %2,%1,%0":: "r"(dst),"b"(offset),"r"(val));
+   return;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP32)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint32_t BSWP__swap32 (uint32_t val)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped version of the specified value. Note that this
+   version byteswaps in an register so the lwrbx is not available.
+
+   PARAMETERS
+   ----------
+          val: The value to be byte swapped
+          
+   RETURNS
+   -------
+   The byteswapped value
+*/   
+{
+   uint32_t tmp;
+   /* For the comments below the bytes are 0 1 2 3, ie byte 0 in the MSB */
+
+   /*
+    | The asm code implements the following sequence in about half the
+    | instructions. I have had trouble with embedding asms with read-modify
+    | -write registers (which is the way the rlwimi instructions treats
+    | its output register). I have not had this problem when the instructions
+    | are contained in a single sequence and protected with a volatile.
+    | The volatile effectively tells the optimizer to keep its hands off.
+    | 
+    |  tmp  = (val & 0x000000ff) << 24;   /- Byte 3 => Byte 0 -/
+    |  tmp |= (val & 0x0000ff00) <<  8;   /- Byte 2 => Byte 1 -/
+    |  tmp |= (val & 0x00ff0000) >>  8;   /- Byte 1 => Byte 2 -/
+    |  tmp |= (val & 0xff000000) >> 24;   /- Byte 0 => Byte 3 -/
+    |
+    |  Another slightly tricky point. The initial load must be split
+    |  from the other 3 instructions. If this is not done, the compiler
+    |  sees TMP as an unitialized LVALUE.
+   */  
+   asm volatile ("rlwinm %0,%1,24,0,7" : "=r"(tmp) : "r"(val)); 
+   asm volatile ("rlwimi %0,%1,8,8,15;    /* Byte 2 => Byte 1 */       \
+                  rlwimi %0,%1,24,16,23;  /* Byte 1 => Byte 2 */       \
+                  rlwimi %0,%1,8,24,31"   /* Byte 0 => Byte 3 */       \
+                : "=r"(tmp) : "r"(val),"0"(tmp));
+   return tmp;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD32)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint32_t BSWP__load32 (const uint32_t *src)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 32 bit word from the specified address using the
+   PowerPCs lwbrx instruction.
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   uint32_t val;
+   asm volatile ("lwbrx  %0,0,%1": "=r"(val) : "r"(src));
+   return val;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD32X)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint32_t BSWP__load32x (const uint32_t   *src,
+                                                unsigned int offset)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 32 bit word from the specified address using the
+   PowerPCs lwbrx instruction. A byte offset is applied to the source
+   address. The byte offset to be applied must be a variable (ie accessible
+   in a register), not a constant. 
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+       offset: The byte offset to apply to the source address
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   uint32_t val;
+
+   /* 
+    | Note that the offset register must be specified with a 'b' constraint
+    | If it is not, the compiler is free to chose any general purpose
+    | register, including r0. For this instruction, when r0 is used as
+    | the index register, it is treated as a source of 0; not good.
+   */
+   asm volatile ("lwbrx  %0,%1,%2": "=r"(val) : "b"(offset), "r"(src));
+   return val;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE32)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store32 (uint32_t   *dst,
+                                  uint32_t    val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 32 bit word value to the specified address using the
+   PowerPCs stwbrx instruction.
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+       offset: A byte offset to apply to the destination address   
+
+          val: The value to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+   asm ("stwbrx  %1,0,%0":: "r"(dst),"r"(val));
+   return;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE32X)  || !defined (BSWP__SELECT)
+/* --------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store32x (uint32_t   *dst,
+                                  unsigned int offset,
+                                  uint32_t    val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 32 bit word value to the specified address using the
+   PowerPCs stwbrx instruction. The byte offset to be applied must be a
+   variable (ie accessible in a register), not a constant. 
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+       offset: A byte offset to apply to the destination address   
+
+          val: The value to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+   /* 
+    | Note that the offset register must be specified with a 'b' constraint
+    | If it is not, the compiler is free to chose any general purpose
+    | register, including r0. For this instruction, when r0 is used as
+    | the index register, it is treated as a source of 0; not good.
+   */
+   asm ("stwbrx  %2,%1,%0":: "r"(dst),"b"(offset),"r"(val));
+   return;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+  
+#endif

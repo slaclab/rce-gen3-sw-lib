@@ -1,0 +1,8 @@
+/** @defgroup container Container
+    @brief Standard data structures from computer science class.
+*/
+
+/** @namespace tool::container
+    @brief Package namespace.
+    @ingroup container
+*/

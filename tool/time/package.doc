@@ -1,0 +1,8 @@
+/** @defgroup time Time
+    @brief Time-of-day manipulation and code execution timing.
+*/
+
+/** @namespace tool::time
+    @brief Package namespace.
+    @ingroup time
+*/

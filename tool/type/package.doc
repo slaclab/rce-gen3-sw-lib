@@ -1,0 +1,9 @@
+/** @defgroup type Type
+    @brief Enriches C++ standard type handling, e.g, properties of
+    enums.
+*/
+
+/** @namespace tool::type
+    @brief Package namespace.
+    @ingroup type
+*/

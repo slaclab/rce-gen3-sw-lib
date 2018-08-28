@@ -1,0 +1,26 @@
+// -*-Mode: C;-*-
+/**
+
+    @mainpage Hash package
+
+    The @c %Hash package provides an interface to the well known
+    [Jenkins hashing algorithm](http://en.wikipedia.org/wiki/Jenkins_hash_function).
+    This facility supports hashing three types of
+    objects:
+    -# NULL terminated strings
+    -# Arbitrary length 32-bit vectors
+    -# Pairs of 64 and 32 bit values.
+
+    The resultant hash is always expressed as a unique, pseudo-random
+    64-bit value.
+
+
+    While the interface to @c %Hash is a pure C interface, it may
+    be used by C++ classes and methods.
+
+    The public methods and their signatures are:
+    - uint64_t HashWord(const uint32_t*, uint32_t, uint32_t)
+    - uint64_t HashString(const char*, uint32_t)
+    - uint64_t Hash64_32(uint64_t, uint32_t)
+    
+*/

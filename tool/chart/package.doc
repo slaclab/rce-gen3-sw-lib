@@ -1,0 +1,8 @@
+/** @defgroup chart Chart
+    @brief Chart a series of (X,Y) points in memory
+*/
+
+/** @namespace tool::chart
+    @brief Package namespace.
+    @ingroup chart
+*/

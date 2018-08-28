@@ -1,0 +1,364 @@
+#ifndef BSWP_IH_XX_XXX_XXX
+#define BSWP_IH_XX_XXX_XXX
+
+/* ---------------------------------------------------------------------- *//*!
+  
+  \file   BSWP.ih.xx-xxx-xxx
+  \brief  Implements the LINUX version of the inline BSWP routines.
+  \author JJRussell - russell@slac.stanford.edu
+  
+\verbatim
+
+    CVS $Id: BSWP.ih.xx-xxx-xxx,v 1.5 2004/12/07 16:13:06 russell Exp $
+\endverbatim
+                                                                          */
+/* ---------------------------------------------------------------------- */
+
+
+/* ---------------------------------------------------------------------- *\
+ *
+ *  HISTORY
+ *  -------
+ *  11.08.03 jjr - BSWP__swap16 code was changed. The Sun-gcc compiler
+ *                 may have a bug in it. This routine failed in test_bswp,
+ *                 but only when optimized and only under certain
+ *                 circumstances. There definitely seems to be some
+ *                 weirdest in the Sun-gcc compiler in handling 
+ *                 short <-> int conversions.
+ *  09.24.03 jjr - Corrected inconsistencies in parameter naming to match
+ *                 documentation/prototype specification. This keeps 
+ *                 DOXYGEN happy, it likes to see all three match.
+ *
+\* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP16)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC unsigned int BSWP__swap16 (uint16_t val)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped version of the specified value. Note that this
+   version byteswaps in an register so the lhrbx is not available.
+
+   PARAMETERS
+   ----------
+          val: The short word to be byte swapped
+          
+   RETURNS
+   -------
+   The byteswapped value
+*/   
+{
+   val = (val >> 8) | (val << 8);
+   return val;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD16)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC unsigned int BSWP__load16 (const uint16_t *src)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 16 bit word from the specified address. This
+   looks a little crazy, but is provided for compatibility with the Power
+   PC version which uses the lhbrx instruction.
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   return BSWP__swap16 (*src);
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD16x) || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC unsigned int BSWP__load16x (const uint16_t    *src,
+                                                unsigned        int offset)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 16 bit word from the specified address after
+   applying the specified byte offset. Note that this is a byte offset.
+
+   This looks a little crazy, but is provided for compatibility with the
+   Power PC version which uses the lhbrx instruction.
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   return BSWP__swap16 (*(uint16_t *)((unsigned char *)src +offset));
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE16) || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store16 (uint16_t    *dst, 
+                                  uint16_t     val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 16 bit word value to the specified address.
+
+   This looks a little crazy, but is provided for compatibility with the
+   Power PC version which uses the sthbrx instruction. 
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+          val: The word to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+   *dst = BSWP__swap16 (val);
+   return;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE16x) || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store16x (uint16_t    *dst, 
+                                   unsigned       int  offset,
+                                   uint16_t     val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 16 bit word value to the specified address after
+   applying the specified byte offset. Note that this is a byte offset.
+
+   This looks a little crazy, but is provided for compatibility with the
+   Power PC version which uses the sthbrx instruction. 
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+       offset: The byte offset to apply
+
+          val: The word to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+  *(uint16_t *)((unsigned char *)dst + offset) = BSWP__swap16 (val);
+   return;
+}
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP32) || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint32_t BSWP__swap32 (uint32_t val)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped version of the specified value. 
+
+
+   PARAMETERS
+   ----------
+          val: The word to be byte swapped
+          
+   RETURNS
+   -------
+   The byteswapped value
+*/   
+{
+   uint32_t tmp;
+
+  	
+   /* For the comments below the bytes are 0 1 2 3, ie byte 0 in the MSB */
+   tmp  = (val & 0x000000ff) << 24;                  /* Byte 3 => Byte 0 */
+   tmp |= (val & 0x0000ff00) <<  8;                  /* Byte 2 => Byte 1 */
+   tmp |= (val & 0x00ff0000) >>  8;                  /* Byte 1 => Byte 2 */
+   tmp |= (val & 0xff000000) >> 24;                  /* Byte 0 => Byte 3 */
+
+   return tmp;
+}
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD32) || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint32_t BSWP__load32 (const uint32_t *src)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 32 bit word from the specified address. This
+   looks a little crazy, but is provided for compatibility with the Power
+   PC version which uses the lwbrx instruction.
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   return BSWP__swap32 (*src);
+}
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD32x) || !defined (BSWP__SELECT)
+/* --------------------------------------------------------------------- */
+BSWP__EXP_FNC uint32_t BSWP__load32x (const uint32_t   *src,
+                                                unsigned int offset)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 32 bit word from the specified address after
+   applying the specified byte offset. Note that this is a byte offset
+
+   This looks a little crazy, but is provided for compatibility with the
+   Power PC version which uses the lwbrx instruction.
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+   RETURNS
+   -------
+   The byteswapped word
+*/   
+{
+   return BSWP__swap32(*(const uint32_t *)((unsigned char *)src + offset));
+}
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE32) || !defined (BSWP__SELECT)
+/* --------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store32 (uint32_t *dst, uint32_t val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 32 bit word value to the specified address. This
+   looks a little crazy, but is provided for compatibility with the Power
+   PC version which uses the stwbrx instruction.
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+          val: The word to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+   *dst = BSWP__swap32 (val);
+   return;
+}
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE32x) || !defined (BSWP__SELECT)
+/* --------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store32x (uint32_t   *dst,
+                                   unsigned int offset,
+                                   uint32_t    val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 32 bit word value to the specified address after
+   applying the specified byte offset. Note that this is a byte offset.
+
+   This looks a little crazy, but is provided for compatibility with the
+   Power PC version which uses the stwbrx instruction.
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+       offset: The byte offset to apply   
+
+          val: The value to load
+
+   RETURNS
+   -------
+   Nothing
+*/   
+{
+   *(uint32_t *)((unsigned char *)dst + offset) = BSWP__swap32 (val);
+   return;
+}
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+  
+#endif

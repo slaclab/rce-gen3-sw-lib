@@ -1,0 +1,32 @@
+#!/bin/bash
+#!
+# @brief  Immediate Boot
+#
+# @author R. Claus
+#
+# @date   5 May, 2012 -- Created
+#
+# $Revision: $
+#
+# @verbatim
+#                               Copyright 2012
+#                                     by
+#                        The Board of Trustees of the
+#                      Leland Stanford Junior University.
+#                             All rights reserved.
+# @endverbatim
+#
+
+cmd=${0##*/}
+
+case $# in
+0|1|2|3)  echo "usage: $cmd <shelf> <slot> <element> <bootstrap>" >&2;  exit 1
+esac
+
+#t=`printf "0x%02x" $(( 128+$2+$2 ))`
+t=`ipmi_get_addr $1 $2`
+v1=`printf "0x%02x" $(( ($4 >> 24) & 0xff ))`
+v2=`printf "0x%02x" $(( ($4 >> 16) & 0xff ))`
+v3=`printf "0x%02x" $(( ($4 >>  8) & 0xff ))`
+v4=`printf "0x%02x" $(( ($4      ) & 0xff ))`
+ipmitool-pps -I lan -H $1-sm -t $t -b 0 -A NONE raw 0x34 0x06 $3 $v1 $v2 $v3 $v4

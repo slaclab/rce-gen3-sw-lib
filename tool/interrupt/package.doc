@@ -1,0 +1,8 @@
+/** @defgroup interrupt Interrupt handling
+    @brief Generic interfaces for the management of interrupt handlers.
+*/
+
+/** @namespace tool::interrupt
+    @brief Package namespace.
+    @ingroup interrupt
+*/

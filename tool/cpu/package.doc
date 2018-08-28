@@ -1,0 +1,8 @@
+/** @defgroup apu APU
+    @brief Register and implement APU instructions.
+*/
+
+/** @namespace tool::apu
+    @brief Package namespace (currently empty).
+    @ingroup apu
+*/

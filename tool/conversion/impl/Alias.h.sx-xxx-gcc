@@ -1,0 +1,69 @@
+#ifndef ALIAS_H_SX_XXX_GCC
+#define ALIAS_H_SX_XXX_GCC
+
+/* --------------------------------------------------------------------- *//*!
+  
+  \file   Alias.h.sx-xxx-gcc
+  \brief  Defines a set of macros used to create function aliases for
+          Solaris under the GCC compiler
+  \author JJRussell - russell@slac.stanford.edu
+
+\verbatim
+  CVS $Id
+\endverbatim
+                                                                         */
+/* --------------------------------------------------------------------- */
+
+
+/*
+ *  WARNING
+ *  -------
+ *  This file is not meant to be included directly by user code. Rather the
+ *  platform neutral "alias.h" should be used.
+ *
+ *  ABSTRACT
+ *  --------
+ *  This provides a way to declare ALIAS for symbols to the SUN GCC compiler.
+ *  The tactic taken is to drop a shard of assembly code which defines the
+ *  alias symbol and sets it equal to another name.  The empty macro's
+ *  ALIAS_BEGIN and ALIAS_END ensure a uniform interface on all platforms.
+ *  (Read that to mean, they are not empty on all platforms.) 
+ *
+ *  USAGE
+ *  -----
+ *  Suppose one has a facility ORG_ containing the routines ORG_get, ORG_set.
+ *  Aliases ALIAS_get and ALIAS_set can be created using the following
+ *  prescription.
+ * 
+ *  ALIAS_BEG (ORG_)
+ *  ALIAS_FNC (int, ORG_get, ALIAS_get)
+ *  ALIAS_FNC (int, ORG_set, ALIAS_set)
+ *  ALIAS_END (ORG_)
+ *
+ *  TARGET
+ *  ------
+ *  This works only for SUNs, but with the GCC
+ *
+ */
+
+#define ALIAS_BEG(_container)
+
+#if (__GNUC__ >= 3) && (__GNUC_MINOR__ >= 2) 
+
+#define ALIAS_FNC(_return_type, _name, _alias)               \
+_return_type _alias () __attribute__ ((alias (# _name)));
+
+#else
+
+#define ALIAS_FNC(_return_type, _name, _alias)             \
+    asm (".global " # _alias "\n"            \
+         ".type "  # _alias  ",#function \n" \
+         # _alias " = " # _name);
+
+#endif
+
+#define ALIAS_END(_container)
+
+
+#endif
+

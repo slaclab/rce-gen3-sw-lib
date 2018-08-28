@@ -1,0 +1,33 @@
+States change by external stimuli:  { Tick(1 second), rcvdBpdu, portEnabled }  - portEnabled can be checked on Tick.
+
+PortTimers decrement on tick
+
+PortReceive:	        "discard"       resets edgeDelayWhile (to MigrateTime) when port is disabled
+			"receive"	executes updateBPDUVersion() { rcvdSTP  if frame is vsn 0,1 TCN or configBPDU, 
+						       rcvdRSTP if frame is RSTP }
+				        resets edgeDelayWhile,
+					awakens PortInformation (via rcvdMsg)
+
+PortProtocolMigration:	"checking RSTP" reset mdelayWhile (to MigrateTime)
+				        sendRSTP = (rstpVersion) [TRUE]
+			"selecting STP" reset mdelayWhile
+					sendRSTP = FALSE
+			"sensing"       awaits a new rcvd{R}STP from PortReceive
+
+BridgeDetection:	"edge"		awaits PortReceive receipt of BPDU
+			"not edge"	awaits port disable or edgeDelayWhile timeout
+
+PortTransmit:		"init"		reset txCount
+			"config"	execute txConfig() { Transmits Configuration BPDU }
+			"tcn"		execute txTcn() { Transmits a TCN BPDU }
+			"rstp"		execute txRstp() { Transmits an RST BPDU }
+			"periodic"	execute txRstp() when tcWhile
+			"idle"		awaits newInfo
+
+
+
+PortInformation:
+
+
+Notes:
+	Not implementing mcheck.

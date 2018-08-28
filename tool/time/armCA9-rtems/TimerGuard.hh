@@ -1,0 +1,149 @@
+// -*-Mode: C++;-*-
+/**
+@file
+@brief Declares and implements class TimerGuard for ARM Cortex-A9.
+@verbatim
+                               Copyright 2013
+                                    by
+                       The Board of Trustees of the
+                    Leland Stanford Junior University.
+                           All rights reserved.
+@endverbatim
+
+@par Facility:
+DAT
+
+@author
+Steve Tether <tether@slac.stanford.edu>
+
+@par Date created:
+2013/10/02
+
+@par Last commit:
+\$Date: 2014-08-13 10:55:05 -0700 (Wed, 13 Aug 2014) $ by \$Author: tether $.
+
+@par Revision number:
+\$Revision: 3652 $
+
+@par Credits:
+SLAC
+*/
+#if !defined(TOOL_TIME_TIMERGUARD_HH)
+#define      TOOL_TIME_TIMERGUARD_HH
+
+
+
+#include "time/platform/time.h"
+
+namespace tool {
+
+  namespace time {
+
+    /// @brief Time a block of code between the exiting of the TimerGuard
+    /// constructor and the start of the TimerGuard destructor. Always
+    /// in-line.
+    ///
+    /// The destructor will call the "void takeTime(unsigned long long,...)"
+    /// member function of the Accumulator object passed to the
+    /// constructor. The first argument will be the elapsed time expressed
+    /// as the number of ticks of whatever system clock is being used.
+    /// Static member functions are provided which convert these values
+    /// into seconds or CPU clock cycles. The second argument is the
+    /// number of repetitions of the desired code inside the timed
+    /// region. The third argument is an arbitrary ID number for the
+    /// section of code.  The last argument is a short comment string.
+    ///
+    /// @warning If you are timing a short stretch of code its
+    /// performance may depend strongly on the contents of the
+    /// instruction and data caches at the beginning of its
+    /// execution. In such cases you'll probably want to prepare the
+    /// caches in some way, e.g., making sure that all the
+    /// instructions to be timed are in the I-cache. You should also
+    /// make sure that Accumulator::takeTime() doesn't change the
+    /// desired cache state. For instance, if it actually prints the
+    /// timing information instead of just saving it it will likely
+    /// replace a good chunk of the I-cache. The same considerations
+    /// apply to calling complex library operations such as new and
+    /// malloc().
+    ///
+    /// If needed by your system TimerGuard uses barrier instructions
+    /// in order to clear the CPU pipeline, prefetched instructions
+    /// and pending data fetch/store operations before the code to be
+    /// timed.
+    ///
+    /// @see The unit test code for examples of how to time small
+    /// sections of code.
+    /// @tparam Accumulator The type of the object
+    /// whose takeTime(unsigned long long,...) member function is
+    /// called by the TimerGuard destructor.
+    template <typename Accumulator>
+    class TimerGuard {
+      /// @brief The contents of the global timer just before
+      /// entering the code to be timed.
+      unsigned long long   _before;
+
+      /// @brief The contents of the global timer just after
+      /// entering the code to be timed.
+      unsigned long long   _after;
+
+      /** @brief A copy of the "accum" argument of TimerGuard().  */
+      Accumulator         &_accum;
+
+      /** @brief A copy of the "rptc" argument of TimerGuard(). */
+      const unsigned       _repeatCount;
+
+      /** @brief A copy of the "id" argument of the constructor. */
+      const unsigned       _id;
+
+      /** @brief A copy of the "comment" argument of the constructor. */
+      const char *const    _comment;
+
+    public:
+      /// @brief Save some information about the section of code to be timed.
+      /// Read the global timer for the first time for this section.
+      /// @param[in] accum A reference to the Accumulator object
+      /// which will provide the takeTime() member function.
+      /// @param[in] rptc A repeat count; if the code being timed consists
+      /// of n repettitions of some basic unit then give n here.
+      /// @param[in] id If you're timing several different code sections
+      /// in the same program, especially using the same Accumlator object,
+      /// use the argument to give each section its own ID number.
+      /// @param[in] comment A short description of the code being timed.
+      TimerGuard(Accumulator &accum, unsigned rptc, unsigned id, const char *comment)
+	__attribute__((always_inline));
+
+      /// @brief Read the global timer again then call takeTime() for the
+      /// associated Accumulator object.
+      ~TimerGuard() __attribute__((always_inline));
+    };
+
+
+    template<typename Accumulator>
+    inline TimerGuard<Accumulator>::TimerGuard(Accumulator &accum,
+					       unsigned rptc,
+					       unsigned id,
+					       const char *comment)
+      : _before(0),
+	_after(0),
+	_accum(accum),
+	_repeatCount(rptc),
+	_id(id),
+	_comment(comment)
+    {
+      // The barrier instructions are there to ensure that we time
+      // only activity generated by the following code.
+      asm volatile("dsb; isb":::"memory");
+      _before = TOOL_TIME_lticks();
+    }
+
+    template<typename Accumulator>
+    inline TimerGuard<Accumulator>::~TimerGuard()
+    {
+      asm volatile("dsb; isb":::"memory");
+      _after = TOOL_TIME_lticks();
+      this->_accum.takeTime(this->_after - this->_before, this->_repeatCount, this->_id, this->_comment);
+    }
+
+  }
+}
+#endif

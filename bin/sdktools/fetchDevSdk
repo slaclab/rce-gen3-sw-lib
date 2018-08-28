@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# fetchDevSdk <architecture> [<architecture> ...]
+# fetchDevSdk all
+#
+# Fetch one or more SDKs from the development tree
+# This does not compile the host tools
+
+declare arches="arm-linux-rceCA9 arm-rtems-rceCA9 i86-linux-32 i86-linux-64"
+declare base="file:///afs/slac/www/projects/CTK/SDK/dev"
+
+usage() {
+    echo "Usage: $(basename ${BASH_SOURCE}) <architecture> [<architecture> ...]"
+    echo "       $(basename ${BASH_SOURCE}) all"
+    echo "Fetches one or more SDKs from the development tree."
+    echo "Valid architectures: $arches"
+    echo
+    exit -1
+}
+
+cloneDev() {
+    local source=$1
+    local dir=$2
+    git clone -q ${source} ${dir}
+    cd ${dir}
+    git checkout -q development
+    cd - > /dev/null
+}
+
+fetch() {
+    local arch=$1
+    local os
+    case $arch in
+        *linux*)
+            os=linux
+            ;;
+        *rtems*)
+            os=rtems
+            ;;
+    esac
+
+    cloneDev $base/$arch $arch
+    cloneDev $base/$arch/include $arch/include
+    cloneDev $base/$arch/lib $arch/lib
+    [ "$os" == "rtems" ] && cloneDev $base/$arch/tgt $arch/tgt
+
+}
+
+fetchall() {
+    local arch
+    for arch in ${arches}; do
+        fetch $arch
+    done
+}
+
+[ $# -lt 1 ] && usage
+
+[ "$1" == "all" ] && { fetchall; exit 0; }
+
+for arch in $*; do
+    if [ $(echo $arches | grep -c ${arch}) -lt 1 ] ; then
+        echo "Architecture $arch is not one of $arches."
+        usage
+    fi
+    fetch $arch
+done

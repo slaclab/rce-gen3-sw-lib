@@ -1,0 +1,4 @@
+Tue Apr 23 14:12:28 2013: RiC
+
+- fsbl, bist and xil directories come from zc702-bist-rdf0166-14.5-c.zip,
+  downloaded from the Xilinx web site.  This is from tutorial xtp180.

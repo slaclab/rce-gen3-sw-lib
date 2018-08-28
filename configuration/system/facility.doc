@@ -1,0 +1,51 @@
+// -*-Mode: C;-*-
+/**
+@file
+@brief Document the faclity codes we use for status values.
+@ingroup configurationsystem
+
+@verbatim
+                               Copyright 2014
+                                    by
+                       The Board of Trustees of the
+                    Leland Stanford Junior University.
+                           All rights reserved.
+@endverbatim
+
+@par Facility:
+DAT
+
+@author
+Stephen Tether<tether@slac.stanford.edu>
+
+@par Date created:
+2014/02/18
+
+@par Last commit:
+\$Date: 2013-11-25 12:14:50 -0800 (Mon, 25 Nov 2013) $ by \$Author: tether $.
+
+@par Revision number:
+\$Revision: 2368 $
+
+@par Location in repository:
+\$HeadURL: file:///afs/slac/g/cci/repositories/ctkrepo/workspace/trunk/make/boilerplate/legal.h $
+
+@par Credits:
+SLAC
+*/
+#error Do not use this header in any code!
+
+/** @brief Facility numbers for use in status codes. See statusCode.h.
+
+   Numbers 0-255 are reserved for core system facilities.
+
+   FAC_OS must always be zero due to the way OS error codes are handled.
+*/
+enum facilityNumbers {
+  FAC_OS   = 0, /**< @brief RTEMS or other OS.*/
+  FAC_LDR  = 1, /**< @brief The image loader/installer. */
+  FAC_SVT  = 2, /**< @brief The Symbol-Value Table handler. */
+  FAC_TASK = 3, /**< @brief The Task runner. */
+  FAC_LNK  = 4, /**< @brief The dynamic linker. */
+  FAC_SAS  = 5  /**< @brief The socket abstraction services. */
+};

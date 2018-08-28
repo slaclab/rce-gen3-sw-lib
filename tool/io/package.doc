@@ -1,0 +1,12 @@
+/** @defgroup io I/O utilities
+    @brief Modify standard I/O behavior
+
+    Sometimes the standard I/O facilities fall a little short. For example,
+    POSIX write() used on many non-file devices won't write all of the data
+    you give it. The code in this package address this and other shortcomings.
+*/
+
+/** @namespace tool::io
+    @brief Package namespace.
+    @ingroup io
+*/

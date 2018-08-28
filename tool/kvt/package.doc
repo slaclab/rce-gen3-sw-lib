@@ -1,0 +1,66 @@
+// -*-Mode: C;-*-
+/** 
+    @mainpage Kvt package
+    @section Summary
+
+    The @c %Kvt package provides the interface to a light-wieght
+    Key-Value-Table facility used for dynamically loading and managing
+    ELF files and images, and for performing lookups from System and
+    User name tables.
+
+    While the interface to @c %Kvt is a pure C interface, it may
+    be used by C++ classes and methods.
+
+    The public methods and their signatures are:
+
+    - ::KvTable KvtConstruct(uint32_t, void*)
+    - ::KvtValue KvtInsert(KvtKey, KvtValue, KvTable)
+    - ::KvtValue KvtLookup(KvtKey, KvTable)
+    - ::KvtValue KvtRename(KvtKey, KvtValue, KvTable)
+    - ::KvtValue KvtRemove(KvtKey, KvTable)
+    - ::KvtKey KvtHash(const char*)
+    - uint32_t KvtSizeof(uint32_t)
+
+    ::KvTable, ::KvtValue and ::KvtKey are typedefs defined in Kvt.h.
+
+    @section example Example
+
+
+    @code
+    #include <stdio.h>
+    #include "kvt/Kvt.h"
+    #include "hash/Hash.h"
+
+    #define LOG2_ENTRIES 8 // 2^8 entries in the table(max)
+
+    KvTable allocate() {
+      char* buffer = new char[KvtSizeof(LOG2_ENTRIES)];
+      if (!buffer) return 0;
+      return KvtConstruct(LOG2_ENTRIES, buffer);
+    }
+
+    void test() {
+      KvTable table = allocate();
+      if (!table) {
+        print("Error: KvTable not allocated\n");
+        return;
+      }
+      
+      KvtKey keys[]   = { KvtHash("One"),
+                          KvtHash("two"),
+                          Hash64_32(0, 0xdecafbad) };
+      KvtValue vals[] = { 1, 2, 0xdecafbad };
+
+      unsigned n = 3;
+      do {
+        KvtInsert(keys[n-1], vals[n-1], table);
+      } while (n--);
+
+      unsigned m = 3;
+      do {
+        printf("Value for key number %d: 0x%08x\n", KvtLookup(keys[m-1], table));;
+      } while (m--);
+    }
+   
+    @endcode
+*/

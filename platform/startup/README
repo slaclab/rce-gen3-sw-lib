@@ -1,0 +1,7 @@
+This package builds two versions of the system core, i.e., RTEMS +
+newlib + RCE C++ support + the RCE dynamic linker. The prod version
+doesn't have NFS mounting or the shell, the devel version does.
+
+The major and minor version numbers for the core are specified near
+the top of constituents.mk. The values are propagated using the rules
+in core.mk.

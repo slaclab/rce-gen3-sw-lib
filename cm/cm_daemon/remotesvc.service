@@ -1,0 +1,11 @@
+[Unit]
+Description=Remote Command/Transfer Service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/remote_server
+ExecStop=/usr/bin/killall /usr/bin/remote_server
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

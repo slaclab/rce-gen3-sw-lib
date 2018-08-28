@@ -1,0 +1,17 @@
+# -*-Mode: Makefile;-*-
+#
+#                               Copyright 2014
+#                                    by
+#                       The Board of Trustees of the
+#                    Leland Stanford Junior University.
+#                           All rights reserved.
+#
+# Facility: DAT
+# Abstract: Makefile used to build the kernel modules ocm and dmabuf.
+# Author: Stephen Tether <tether@slac.stanford.edu>
+# Date created: 2014-09-11
+# Last commit: \$Date: 2014-05-01 17:46:01 -0700 (Thu, 01 May 2014) $ by \$Author: panetta $.
+# Credits: SLAC
+
+# See Documentation/kbuild/modules.txt in the kernel source tree.
+obj-m := dmabuf.o ocm.o

@@ -1,0 +1,244 @@
+
+/** @brief The outer namespace. */
+namespace tool {
+
+/** @brief The inner namespace.*/
+namespace concurrency {
+
+/**
+  @mainpage Concurrency package
+  @section summary Summary
+  The @c %concurrency package provides generic wrappers for parts of the
+  platform-specific threading APIs. It was written to allow code that
+  uses the classic RTEMS task manager to be tested under Linux. For
+  that reason it concentrates on those operations provided by the task
+  manager. For example there's no "join" operation provided since the
+  classic RTEMS API provides none. The following features are provided
+  as C++ classes:
+
+    - Cooperative threading. Threads run until they explicitly yield the
+    processor, sleep, get suspended or get blocked for other reasons
+    such as I/O waits. You can specify the priority, stack size and
+    name of the thread you create.
+    
+    - Binary semaphores.
+
+    - %Semaphore "guards". A guard object's takes a given semaphore and
+    its destructor releases the same semaphore. Useful for making a
+    C++ scope into a critical section since no matter how the scope
+    is exited the semaphore gets released.
+
+    - Generic critical section marker. Hides the critical section
+    implementation.
+
+    - Once-only initialization that is thread-safe. Similar to
+    pthread_once(). C++ class Once and C type OnceFlag (preferred).
+
+    - Thread-local storage in the form of "notepad" slots where each
+    slot is big enough to hold an int or a pointer.
+
+    - Simple counters with atomic addition and subtraction.
+    .
+
+  The package provides a base class Thread from which you derive
+  classes specific to your application. Any data members you put in
+  your derived class are of course accessible from its member
+  functions. In that sense the data members serve as a kind of
+  ready-made thread-local storage. Most of the time you won't need to
+  use notepad slots which is good because only a small number of slots
+  are available.
+
+  The package also provides a C wrapper called BasicMutex which uses
+  hardware mutual exclusion instructions directly and makes no
+  operating system calls. It may be allocated and initialized
+  statically unlike the semaphore mentioned above.
+
+  @section restrictions Restrictions
+
+  Under RTEMS the number of semaphores and threads in the system is
+  limited, currently to about 50 of each though that number can be
+  changed by reconfiguring RTEMS. The number of notepad slots
+  available under RTEMS is sixteen and can't be increased. The
+  number of slots offered by the concurrency package is therefore
+  explicitly limited to sixteen, and one of those is used by the
+  concurrency package itself.
+  
+  On ARM systems a BasicMutex must be in "normal" memory in order to
+  work properly. Usually that's what your code will use so it isn't
+  a problem. Under Linux, though, memory outside of normal system
+  RAM that is mapped into your process using mmap() won't be
+  suitable.
+
+  @section examples Examples
+  @subsection Multi-threaded Hello
+  @code
+
+
+  #include "concurrency/Semaphore.hh"
+  #include "concurrency/SemaphoreGuard.hh"
+  #include "concurrency/Thread.hh"
+ 
+  using tool::concurrency::Semaphore;
+  using tool::concurrency::SemaphoreGuard;
+  using tool::concurrency::Thread;
+ 
+  // Derive from class Thread to make your custom thread class.
+  class Hello: public Thread {
+  public:
+    Semaphore lock;
+    bool done;
+    int id;
+    Hello(int id)
+      : Thread(),
+        lock(),
+        done(false),
+        id(id)
+    {
+      name("child");
+    }
+ 
+    virtual ~Hello() {}
+ 
+    virtual void body() {
+      printf("Hello from thread '%s %d'.\n", name(), id);
+      SemaphoreGuard g(lock); // Release lock at end of function.
+      done = true;
+    }
+  };
+ 
+  void testHello() {
+    printf("\n");
+    printf("========== Test simple thread creation ==========\n");
+    printf("Hello from the main thread.\n");
+    Hello t1(1);
+    Hello t2(2);
+    t1.start();
+    t2.start();
+    // Wait for both threads to finish.
+    bool done = false;
+    while (!done) {
+      Thread::threadYield(); // Give them a chance to run.
+      bool d1, d2;
+      {SemaphoreGuard g(t1.lock); d1 = t1.done; }
+      {SemaphoreGuard g(t2.lock); d2 = t2.done; }
+      done = d1 && d2;
+    }
+  }
+  @endcode
+
+  In this example each child thread has a semaphore used to lock its
+  "done" flag. It's overkill for the case of a simple boolean flag but
+  we want to show how to use class Semaphore. Note how the main thread
+  uses C++ blocks in order to provide a scope for each guard; the
+  guard is destroyed, releasing the semaphore, at the end of each
+  block. The Hello thread code doesn't need to use a block since the
+  guard will be destroyed when the body() function returns.
+
+  The default constructor for Thread is called which makes the child
+  threads inherit the priority and stack size of the parent. Note how
+  the parent must yield the CPU in order to ensure that the child
+  threads get run time.
+
+  The function testHello() is assumed to be called from some other
+  Thread. If you have a existing thread that was created some other
+  way, say by the OS or by direct calls to the platform threading API,
+  you can create a Thread instance for it and then call graduate(). No
+  new flow of control is created but the body() member of the Thread
+  instance will be run in the full Thread context:
+
+  @code
+  #include "concurrency/Thread.hh"
+  using tool::concurrency::Thread;
+ 
+  class Main: public Thread {
+    // Your code here ...
+  };
+ 
+  int main(int argc, char **argv) {
+    Main tmain(argc,argv);
+    // Run Main::body() in the current flow of control.
+    tmain.graduate();
+    // Arrive here when Main::body() returns.
+    // ...
+  };
+  @endcode
+
+  @if development
+  @section developer Developer's info
+
+  @subsection svn Location in Subversion repository
+
+  The bulk of the source code is under tool/concurrency/. The Pth
+  library source code is under pth/ (see the implementation notes).
+
+  @subsection impl Implementation notes
+
+  The RTEMS implementation of the Thread and Semaphore classes uses
+  the classic RTEMS API, e.g., rtems_task_*(),
+  rtems_semaphore_*(). The RTEMS tasks created are non-preemptable
+  since the intent is to provide cooperative multi-threading. The
+  Linux implementation doesn't use pthreads because pthreads creates
+  threads that are visible to the kernel and are scheduled using the
+  normal Linux process scheduler. One can get different scheduling
+  with pthreads under Linux only by running as a privileged user,
+  which seems too restrictive. The Linux implementation therefore uses
+  the GNU Pth library, with a few changes made to allow simple mapping
+  between Pth and RTEMS priorities and to have sendmsg()/recvmsg()
+  block only the calling thread instead of the entire process.
+
+  Under Linux a new thread has access to process resources such as
+  memory, file descriptors and the stdio streams. Under RTEMS the set
+  of open file descriptors is shared but not the stdio streams; each
+  task is given a private stdin, stdout and stderr associated with
+  file descriptors 0, 1, and 2 respectively. These file descriptors
+  are normally associated with the console. The Thread class overrides
+  this standard assignment so that the stdio streams in the new task
+  use the file descriptor that stdin uses in the parent task. This
+  makes printf() output, for example, in the new task go to the same
+  place as it does in the parent task, which from experience seems to
+  be the behavior that users expect. This has turned out to be
+  especially useful when the parent task's stdin/stdout is a telnet
+  pty instead of the console.
+
+  Despite their tight coupling to the hardware, Atomic, BasicMutex and
+  OnceFlag avoid explicit platform dependence by making use of
+  synchronization primitives built into GCC. The compiler will
+  generate correct code provided you specify the right CPU on the
+  command line. BasicMutex in addition uses the exclusion.h header
+  from the "system" package in order to find out how much memory is
+  locked by an exclusive reference, the "exclusion
+  granularity". BasicMutex makes use of this in order to ensure that
+  each mutex occupies all of a single exclusion granule and no more.
+  This prevents a form of performance degradation known as "false
+  sharing". This occurs when two unrelated lock variables happen to
+  lie within the same exclusion granule so that reserving one cancels
+  the reservation on the other. This leads to extra retries when
+  obtaining locks though it doesn't cause incorrect execution.
+
+  CriticalSection and CriticalSectionLock are currently implemented
+  using Semaphore and SemaphoreGuard, respectively.
+
+  @subsection tests Unit tests
+
+  The testConcurrency program exercises Thread, Semaphore,
+  SemaphoreGuard and BasicMutex. Most of the output is from the Dining
+  Philosophers simulation for N=5, run once using Semaphores for
+  synchronization and once using BasicMutexes. Other tests check
+  that attempts to delete locked Semaphores or active Threads are
+  detected. Exception throwing and catching within Threads is tested.
+
+  The classic Dining Philosophers problem has N philosophers seated
+  around a circular table. Each philosopher has his own plate of food
+  but there are only N chopsticks, so each chopstick is shared by two
+  adjacent philosophers. In order to eat a philosopher must gain
+  exclusive use of both chopsticks on either side. Each philosopher
+  spends some time thinking, getting hungry and eating. A correct
+  solution must allow every philosopher a chance to eat without any
+  two adjacent philosophers eating at the same time. The
+  implementation in the unit test runs for about a minute and checks
+  both of these conditions.
+  @endif
+ 
+*/
+
+}}

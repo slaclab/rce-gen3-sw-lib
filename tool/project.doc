@@ -1,0 +1,9 @@
+/**
+@mainpage Overview
+This project, tool, contains small snippets of useful code organized by category. Each category has its own package with its own namespaces inside the tools namespace.
+*/
+
+/**
+@brief Project namespace.
+*/
+namespace tool {}

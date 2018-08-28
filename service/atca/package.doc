@@ -1,0 +1,22 @@
+/** @brief The outer namespace. */
+namespace service {
+
+/** @brief The inner namespace. */
+namespace atca {
+
+/** 
+  @mainpage ATCA service
+  @section summary Summary
+  The @c %atca package contains core code which defines a DSL service
+  which handles requests for information about the RCE.  The information
+  returned is:
+
+    - The RCE's Address in shelf/slot/bay/rce notation. 
+
+    - The IPV4 address of the RCE's primary interface.
+
+    - The MAC address for the RCE's primary interface.
+
+
+*/
+}}

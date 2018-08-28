@@ -1,0 +1,8 @@
+/** @defgroup exception Exception
+    @brief Standard exception base classes, tracebacks, etc.
+*/
+
+/** @namespace tool::exception
+    @brief Package namespace.
+    @ingroup exception
+*/

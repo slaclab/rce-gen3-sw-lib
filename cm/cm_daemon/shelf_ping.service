@@ -1,0 +1,11 @@
+[Unit]
+Description=Shelf Ping Server
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/shelf_ping_server
+ExecStop=/usr/bin/killall /usr/bin/shelf_ping_server
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

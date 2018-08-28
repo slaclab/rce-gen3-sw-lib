@@ -1,0 +1,8 @@
+/** @defgroup test module
+    @brief Some test modules.
+*/
+
+/** @namespace test::module
+    @brief Package namespace (currently empty).
+    @ingroup module
+*/

@@ -1,0 +1,12 @@
+/** @defgroup string String manipulation
+    @brief Formatting and management of both std::string values and C-strings.
+
+    These are what might be called cross-over tools in that they provide printf()-like
+    formatting into std::string and std::string-like automatic storage
+    management for C-strings.
+  */
+
+/** @namespace tool::string
+    @brief Package namespace.
+    @ingroup string
+*/

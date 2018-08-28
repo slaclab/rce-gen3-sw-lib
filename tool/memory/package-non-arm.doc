@@ -1,0 +1,20 @@
+/** @defgroup memory Memory
+    @brief Dynamic storage allocation, memory pools and cache control.
+*/
+
+/** @namespace tool::memory
+    @brief Package namespace.
+    @ingroup memory
+*/
+
+
+namespace tool {
+
+namespace memory {
+
+/**
+  @mainpage No documentation for this platform
+ 
+*/
+
+}}

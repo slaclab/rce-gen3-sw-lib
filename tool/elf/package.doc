@@ -1,0 +1,25 @@
+/** @defgroup elf ELF
+    @brief The dynamic linker and supporting code
+*/
+
+/** @namespace tool::elf
+    @brief Package namespace.
+    @ingroup elf
+*/
+
+
+namespace tool {
+
+namespace elf {
+
+/**
+  @mainpage ELF package
+  @section summary Summary
+
+  The @c %elf package is used to manipulate various forms of compiled code. 
+  Most users will only need to use the dynamic linker. See the
+  <a href="https://confluence.slac.stanford.edu/x/bY0tCg">Dynamic linker Confluence page</a>.
+ 
+*/
+
+}}

@@ -1,0 +1,99 @@
+#!/bin/bash
+#
+# Link an RTEMS task from one source file
+#
+
+PROGNAME=${0##*/}
+
+# haveArch is set after the architecture is set.  If another arch is also 
+# set, then an error is declared 
+declare -i haveArch=0
+
+declare CFLAGS=
+declare GCC=
+declare ALL_ELSE=
+
+declare -i verbose=0
+
+usage()
+{
+    cat <<EOF
+        Usage: ${PROGNAME} [options] <sourcefile> [extra_compiler_opts]
+
+        Link a TASK from a source file for use with RTEMS
+
+EOF
+    cat <<EOF | column -s\& -t
+        Options: &
+        -h|--help & show this output
+        -v|--verbose & print the compilation statement
+EOF
+    exit -1
+}
+
+
+abort() 
+{
+    echo $*
+    exit -1
+}
+
+armSetup()
+{
+#JHP_KILL#    local -i doCore=$1;  shift
+
+    [ ${haveArch} -ne 0 ] && abort "armSetup: architecture is already set" || haveArch=1
+
+    GCC=arm-rtems4.11-gcc
+
+    CFLAGS+="-Wl,--hash-style=gnu "
+    CFLAGS+="-Wl,--no-undefined "
+    CFLAGS+="-Wl,--allow-shlib-undefined "
+    CFLAGS+="-Wl,--unresolved-symbols=ignore-in-shared-libs "
+    CFLAGS+="-Wl,-ltaskstub "
+    CFLAGS+="-shared -nostdlib -nostartfiles "
+    CFLAGS+="-e Task_Entry "
+    CFLAGS+="-Wl,-z,max-page-size=4096 "        
+    CFLAGS+="-Wl,-T,shareable.ld "   # Should come after all other linker options.
+
+}
+
+setup()
+{
+    # first char + ==> Scanning mode = stop after non-option to avoid
+    # parsing of extra options for compiler as part of this script's 
+    # options
+    SHORTOPTS="+hv"
+    LONGOPTS="help,verbose,arm,core,board:,bsp:"
+    OPTS=$(getopt -s bash --alternative --options $SHORTOPTS \
+         --longoptions $LONGOPTS -- $@ )
+
+    eval set -- ${OPTS}
+
+    while true; do
+        case "$1" in
+            -h|--help)    usage;         shift;;
+            -v|--verbose) verbose=1;     shift;;
+            --arm)                       shift;;
+            --core)                      shift;;
+            --board)                     shift 2;;
+            --bsp)                       shift 2;;
+            --)                          shift;  break;;
+            *)                           shift;  break;;
+        esac
+    done
+
+    armSetup
+    
+    SRCFILE=$1; shift
+    ALL_ELSE=${*}
+}
+
+setup "$@"
+
+[ ${#SRCFILE} -eq 0 ]   && usage
+[ ${haveArch} -eq 0 ]    && usage
+[ ${verbose} -ne 0 ]     && set -o xtrace
+${GCC} ${SRCFILE} ${ALL_ELSE} ${CFLAGS}
+
+

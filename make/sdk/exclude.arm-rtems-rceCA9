@@ -1,0 +1,90 @@
+# The .maps are only useful for debugging -- revisit
+mod/*.map
+#
+# Test executables
+mod/IbBsiTest.exe
+mod/IbTest.exe
+mod/MapTest.exe
+mod/ObTest.exe
+mod/ObTiming.exe
+mod/bugcheck.exe
+mod/codeTiming.exe
+mod/hello.exe
+#mod/memscan.exe
+mod/oroborous.exe
+mod/redirect.exe
+#mod/regions.exe
+mod/test*
+mod/throw.exe
+# Built by the SDK
+mod/appinit.so
+#
+# Include directories that we don't want to export
+include/core/axi/*
+include/core/bist/*
+include/core/ethXaui/*
+include/core/dslutil/*
+# This encompasses all the bootloader stuff
+include/core/boot*
+include/core/chart/*
+include/core/cmbcfg/*
+include/core/console/*
+include/core/ethEmacPs/*
+include/core/ethPio/*
+include/core/flashMemTest/*
+include/core/fsbl/*
+include/core/gic/*
+include/core/histogram/*
+include/core/io/*
+include/core/memTest/*
+include/core/memTestX/*
+include/core/networkcfg/*
+include/core/nfs/*
+include/core/ocm/*
+include/core/ppi/*
+include/core/rced/*
+include/core/rtems/*
+include/core/rts/*
+include/core/sd/*
+include/core/startup/*
+include/core/string/*
+include/core/svtcfg/*
+include/core/testMainApp/*
+include/core/testRtemsApp/*
+include/core/xil/*
+include/core/xilinxcfg/*
+#
+# Specific include files we want to remove
+# Probably need to revisit and simply move stuff around to hide it
+include/core/atca/init.hh
+include/core/container/Stack.hh
+include/core/debug/init.h
+include/core/debug/os/*
+include/core/debug/family/*
+include/core/dsl/init.hh
+include/core/elf/GnuHasher.h
+include/core/elf/Object.h
+include/core/elf/SysvHasher.h
+include/core/elf/baseTypes.h
+include/core/memory/*Arena*
+include/core/memory/*Cache*
+include/core/memory/*GenericPool*
+include/core/memory/*Pool*
+include/core/memory/*PoolEntry*
+include/core/memory/cpu/memRegionConstants.h
+include/core/memory/cpu/memConstants.h
+include/core/memory/cpu/memTest.h
+include/core/network/BsdNet.hh
+include/core/network/Params.hh
+include/core/network/configure.hh
+include/core/shell/Command.h
+include/core/shell/shell.h
+include/core/system/*Params*
+include/core/system/*memory*
+include/core/system/*ConfigDb*
+include/core/system/gen/sd.h
+#
+# These all get revisited after protocol plugins finish
+include/core/debug/registers.h
+mod/SasTest.exe
+mod/ppi.so

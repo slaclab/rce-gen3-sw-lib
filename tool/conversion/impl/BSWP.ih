@@ -1,0 +1,2017 @@
+#ifndef BSWP_IH
+#define BSWP_IH
+
+
+/* --------------------------------------------------------------------- *//*!
+
+   \file   BSWP.ih
+   \brief  Byteswapping, inline versions
+   \author JJRussell - russell@slac.stanford.edu
+
+\verbatim
+
+    CVS $Id: BSWP.ih,v 1.8 2005/10/01 01:00:11 russell Exp $
+\endverbatim
+
+   \b SYNOPSIS \n
+    This provides a generic interface to the inline byte swapping. These
+    routines are inspired by the PPC instructions that perform byte swapping
+    operations.
+
+    The PPC provides three sets of instuctions, one that operates on 16 bit
+    values one that operates on 32 bit values and one that operates on
+    64 bit values. All three sets have five instructions. The first two
+    byte  swaps the data as in loads it from memory, while the second one
+    byte swaps the data as it stores it in memory. These instructions come
+    in two flavors, a straight addressing mode and an indexed addressing
+    mode. The final two do the byteswapping as immediate value. This final
+    one is provided only in this sense of completing the complement of
+    operations.  Unfortunately there is no instruction to byte swap a
+    value already in a register.  All 6 of these instructions are made
+    available as inline functions.
+
+    In addition to splitting the routines into 16, 32 and 64 bit versions,
+    the routines can be split along another axis, single and array
+    versions. The array versions are really just convenience routines
+    in that all they do is wrap the single word routines in a loop. Since
+    this is a common thing to do, they are also provided, although only
+    in a callable form (see BSWP.h).
+
+    The single word swapping routines have only an inline implementation.
+    This is because these routines are so simple and efficiency is a major
+    design driver, there is no reason to use a callable version.
+                                                                         */
+/* --------------------------------------------------------------------- */
+
+#include "conversion/Inline.h"
+#include "conversion/Unions.h"
+#include "conversion/Attribute.h"
+#include "conversion/Endianness.h"
+#include <stdint.h>
+
+
+/* ---------------------------------------------------------------------- *\
+ *
+ * HISTORY
+ * -------
+ *
+ * DATE     WHO WHAT
+ * -------- --- ---------------------------------------------------------
+ * 09.27.05 jjr Fixed documentation to work with Doxygen 1.4.4
+ * 09.27.05 jjr Added history log
+ *
+\* ---------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------------------- */
+#ifndef  CMX_DOXYGEN           /* Internal stuff only, keep DOXYGEN away */
+/* --------------------------------------------------------------------- *//*!
+
+  \def   BSWP__EXP_PROTO
+  \brief Inline definition for an exportable prototype declaration.
+                                                                        *//*!
+  \def   BSWP__LCL_PROTO
+  \brief Inline definition for a  static/local prototype declaration.
+                                                                        *//*!
+  \def   BSWP__EXP_FNC
+  \brief Inline definition for an exportable function declaration.
+                                                                        *//*!
+  \def   BSWP__LCL_FNC
+  \brief Inline definition for an static/local function declaration.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#ifdef  BSWP_IMPLEMENTATION_FILE
+
+
+#define BSWP__LCL_PROTO INLINE_IMP_LCL_PROTO
+#define BSWP__LCL_FNC   INLINE_IMP_LCL_FNC
+#define BSWP__EXP_PROTO INLINE_IMP_EXP_PROTO
+#define BSWP__EXP_FNC   INLINE_IMP_EXP_FNC
+
+#else
+
+
+#define BSWP__LCL_PROTO INLINE_USR_LCL_PROTO
+#define BSWP__LCL_FNC   INLINE_USR_LCL_FNC
+#define BSWP__EXP_PROTO INLINE_USR_EXP_PROTO
+#define BSWP__EXP_FNC   INLINE_USR_EXP_FNC
+
+#endif
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP16)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__swap16 (uint16_t val)
+  \brief     Byte swaps a 16 bit word
+  \param val The 16 bit word to swap
+  \return    The byte-swapped value of the 16 bit integer
+
+   This routine should be used when byte-swapping 16 bit quantities that
+   are already in registers. The routines BSWP__load16() and BSWP__store16
+   should by used when loading or storing 16 bit quantities from/into
+   memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP16L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__swap16l (uint16_t val)
+  \brief     Ensures that the little endian input 16 bit word \a val is
+             transformed to the host representation.
+  \param val The little endian 16 bit value
+  \return    The host representation of the little endian \a val
+
+   This routine returns the host representation of  known little endian
+   16 bit value, already in a register. The routines BSWP__load16l(),
+   BSWP__store16l() or BSWP__store16xl() should by used when loading or
+   storing known little endian 16 bit quantities from/into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP16B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__swap16b (uint16_t val)
+  \brief     Ensures that the big endian input 16 bit word \a val is
+             transformed to the host representation.
+  \param val The big endian 16 bit value
+  \return    The host representation of the big endian \a val
+
+   This routine returns the host representation of  known big endian
+   16 bit value, already in a register. The routines BSWP__load16b(),
+   BSWP__store16b() or BSWP__store16xb() should by used when loading or
+   storing known big endian 16 bit quantities from/into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD16)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__load16 (const uint16_t *src)
+  \brief     Loads a byte swapped version of the 16 bit integer from
+             memory
+  \param src The address of the 16 bit integer to load
+  \return    The byte-swapped value of the 16 bit integer
+
+   This routine should be used when loading 16 bit byte-swapped value
+   from memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD16L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__load16l (const uint16_t *src)
+  \brief     Loads the host representation of the known little endian 16
+             bit integer byte from  memory
+  \param src The address of the known little endian 16 bit integer to load
+  \return    The host representation  of the little endian 16 bit integer
+
+   This routine should be used when loading a known little endian 16 bit
+   values from memory and the caller wishes that value to be in the
+   host's representation.
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD16B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__load16b (const uint16_t *src)
+  \brief     Loads the host representation of the known big endian 16
+             bit integer byte from  memory
+  \param src The address of the known bit endian 16 bit integer to load
+  \return    The host representation  of the big endian 16 bit integer
+
+   This routine should be used when loading a known big endian 16 bit
+   values from memory and the caller wishes that value to be in the
+   host's representation.
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD16X)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           unsigned int BSWP__load16x (const uint16_t *src,
+                                            unsigned int           offset)
+  \brief        Loads a byte swapped version of the 16 bit integer from
+                memory
+  \param src    The address of the 16 bit integer to load
+  \param offset The byte offset from the source
+  \return       The byte-swapped value of the 16 bit integer
+
+   This routine should be used when loading 16 bit byte-swapped value
+   from memory. If the offset is known to be a constant, it is marginally
+   more efficient to use BSWP__load16().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD16LX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           unsigned int BSWP__load16lx (const uint16_t *src,
+                                             unsigned int           offset)
+  \brief        Loads the host representation of the known little endian 16
+                bit integer byte from  memory.
+  \param src    The address of the known little endian 16 bit integer to load.
+  \param offset The byte offset from the source
+  \return       The host representation  of the little endian 16 bit integer
+
+   This routine should be used when loading a known little endian 16 bit
+   value from memory. and the caller wishes that value to be in the
+   host's representation. If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP__load16l().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD16BX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           unsigned int BSWP__load16bx (const uint16_t *src,
+                                             unsigned int           offset)
+  \brief        Loads the host representation of the known bige endian 16
+                bit integer byte from  memory.
+  \param src    The address of the known big endian 16 bit integer to load.
+  \param offset The byte offset from the source
+  \return       The host representation  of the big endian 16 bit integer
+
+   This routine should be used when loading a known big endian 16 bit
+   value from memory. and the caller wishes that value to be in the
+   host's representation. If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP__load16l().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE16)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store16 (uint16_t *dst,
+                                 uint16_t  val);
+  \brief     Stores a byte swapped version of the 16 bit integer to
+             memory
+  \param dst The address of the destination word
+  \param val The word to byte swap and store
+
+   This routine should be used when storing a 16 bit byte-swapped value
+   into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE16L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store16l (uint16_t *dst,
+                                 uint16_t  val)
+  \brief     Stores the host representation of \a val into memory
+             as a 16 bit little endian integer
+  \param dst The address of the destination word
+  \param val The 16 bit integer to store as a little endian 16 bit
+             integer.
+
+   This routine should be used when storing the host's representation
+   of a 16 bit integer into memory as a little endian 16 bit integer.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE16B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store16b (uint16_t *dst,
+                                 uint16_t  val)
+  \brief     Stores the host representation of \a val into memory
+             as a 16 bit big endian integer
+  \param dst The address of the destination word
+  \param val The 16 bit integer to store as a big endian 16 bit
+             integer.
+
+   This routine should be used when storing the host's representation
+   of a 16 bit into memory as a little endian 16 bit integer.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE16X)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store16x (uint16_t *dst,
+                                     unsigned int     offset,
+                                     uint16_t  val);
+  \brief        Stores a byte swapped version of the 16 bit integer to
+                memory
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The word to byte swap and store
+
+   This routine should be used when storing a 16 bit byte-swapped value
+   into memory. If the value is already in a register, then use
+   \a BSWP__swap16(). If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP__store16().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE16LX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store16lx (uint16_t *dst,
+                                     unsigned int     offset,
+                                     uint16_t  val)
+  \brief        Stores the host representation of \a val into memory
+                as a 16 bit little endian integer
+
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The little endian 16 bitword to store
+
+   This routine should be used when storing the host's representation
+   of a 16 bit integer into memory. If the value is already in a register,
+   then use  \a BSWP__swapl(). If the offset is known to be a constant, it
+   is  marginally more efficient to use BSWP__store16l().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE16BX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store16bx (uint16_t *dst,
+                                     unsigned int     offset,
+                                     uint16_t  val)
+  \brief        Stores the host representation of \a val into memory
+                as a 16 bit big endian integer
+
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The big endian 16 bit integer to store
+
+   This routine should be used when storing the host's representation
+   of a 16 bit integer into memory. If the value is already in a register,
+   then use  \a BSWP__swap16b(). If the offset is known to be a constant, it
+   is  marginally more efficient to use BSWP__store16b().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__SWAP16_LCLXLITTLE)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__swap16_lclXlittle (uint16_t val)
+  \brief     Byte swaps a 32 bit word; local representation <=> little
+  \param val The 16 bit word transform from/to the local representation
+             to/from little endian representation
+  \return    The appropriately byte-swapped value of the 16 bit integer
+
+   This routine is used to swap a source word in the local target
+   machine representation's into a little endian representation. Due
+   to the symmetrical nature of the translation, it also works the
+   other way, i.e. swapping a source word in a little endian
+   representation into the local target machine's representation.
+
+   If the local target machine representation is little endian, then
+   this routine is a NOOP.
+
+ \warning
+   This routine is being deprecated. The new name is BSWP__swap16l().
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP16_LCLXBIG)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        unsigned int BSWP__swap16_lclXbig (uint16_t val)
+  \brief     Byte swaps a 16 bit word; local representation <=> big
+  \param val The 16 bit word transform from/to the local representation
+             to/from big endian representation
+  \return    The appropriately byte-swapped value of the 16 bit integer
+
+   This routine is used to swap a source word in the local target
+   machine representation's into a big endian representation. Due
+   to the symmetrical nature of the translation, it also works the
+   other way, i.e. swapping a source word in a big endian
+   representation into the local target machine's representation.
+
+   If the local target machine representation is big endian, then
+   this routine is a NOOP.
+
+ \warning
+   This routine is being deprecated. The new name is BSWP__swap16b().
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__SWAP32)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint32_t BSWP__swap32 (uint32_t val)
+  \brief     Byte swaps a 32 bit word
+  \param val The 32 bit word to swap
+  \return    The byte-swapped value of the 32 bit integer
+
+   This routine should be used when byte-swapping 32 bit quantities that
+   are already in registers. The routines BSWP__load32() and BSWP__store32
+   should by used when loading or storing 32 bit quantities from/into
+   memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP32L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint32_t BSWP__swap32l (uint32_t val)
+  \brief     Ensures that the little endian input 32 bit word \a val is
+             transformed to the host representation.
+  \param val The little endian 32 bit value
+  \return    The host representation of the little endian \a val
+
+   This routine returns the host representation of  known little endian
+   32 bit value, already in a register. The routines BSWP__load32l(),
+   BSWP__store32l() or BSWP__store32xl() should by used when loading or
+   storing known little endian 32 bit quantities from/into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP32B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint32_t BSWP__swap32b (uint32_t val)
+  \brief     Ensures that the big endian input 16 bit word \a val is
+             transformed to the host representation.
+  \param val The big endian 32 bit value
+  \return    The host representation of the big endian \a val
+
+   This routine returns the host representation of  known big endian
+   32 bit value, already in a register. The routines BSWP__load32b(),
+   BSWP__store32b() or BSWP__store32xb() should by used when loading or
+   storing known big endian 32 bit quantities from/into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD32)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint32_t BSWP__load32 (const uint32_t *src)
+  \brief     Loads a byte swapped version of the 32 bit integer from memory
+  \param src The address of the 32 bit integer to load
+  \return    The byte-swapped value of the 32 bit integer
+
+   This routine should be used when loading 32 bit byte-swapped value
+   from memory. If the value is already in a register, then use
+   \a BSWP__swap32().
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD32L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint32_t BSWP__load32l (const uint32_t *src)
+  \brief     Loads the host representation of the known little endian 32
+             bit integer byte from  memory
+  \param src The address of the known little endian 32 bit integer to load
+  \return    The host representation  of the little endian 32 bit integer
+
+   This routine should be used when loading a known little endian 32 bit
+   values from memory and the caller wishes that value to be in the
+   host's representation.
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD32B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint32_t BSWP__load32b (const uint32_t *src)
+  \brief     Loads the host representation of the known big endian 32
+             bit integer byte from memory.
+  \param src The address of the known bit endian 32 bit integer to load
+  \return    The host representation  of the big endian 32 bit integer
+
+   This routine should be used when loading a known big endian 32 bit
+   values from memory and the caller wishes that value to be in the
+   host's representation.
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD32X)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn          uint32_t BSWP__load32x (const uint32_t   *src,
+                                                 unsigned int offset)
+  \brief        Loads a byte swapped version of the 32 bit integer from
+                memory after applying the specified offset.
+  \param    src The address of the 32 bit integer to load
+  \param offset The byte offset to be applied.
+  \return        The byte-swapped value of the 32 bit integer
+
+   This routine should be used when loading 32 bit byte-swapped value
+   from memory. If the value is already in a register, then use
+   \a BSWP__swap32().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD32LX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           uint32_t BSWP__load32lx (const uint32_t *src,
+                                             unsigned int     offset)
+  \brief        Loads the host representation of the known little endian 32
+                bit integer byte from  memory.
+  \param src    The address of the known little endian 32 bit integer to load.
+  \param offset The byte offset from the source
+  \return       The host representation  of the little endian 32 bit integer
+
+   This routine should be used when loading a known little endian 32 bit
+   value from memory. and the caller wishes that value to be in the
+   host's representation. If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP__load32l().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD32BX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           uint32_t BSWP__load32bx (const uint32_t *src,
+                                             unsigned int     offset)
+  \brief        Loads the host representation of the known bige endian 32
+                bit integer byte from  memory.
+  \param src    The address of the known big endian 32 bit integer to load.
+  \param offset The byte offset from the source
+  \return       The host representation  of the big endian 32 bit integer
+
+   This routine should be used when loading a known big endian 32 bit
+   value from memory. and the caller wishes that value to be in the
+   host's representation. If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP__load32l().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE32)
+/* --------------------------------------------------------------------- *//*!
+
+    \fn        void BSWP__store32 (uint32_t *dst, uint32_t val);
+    \brief     Stores a byte swapped version of the 32 bit integer to
+               memory
+    \param dst The address of the destination word
+    \param val The word to byte swap and store
+
+    This routine should be used when storing a 32 bit byte-swapped value
+    into memory. If the value is already in a register, then use
+    \a BSWP__swap32().
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE32L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store32l (uint32_t *dst,
+                                  uint32_t  val)
+  \brief     Stores the host representation of \a val into memory
+             as a 32 bit little endian integer
+  \param dst The address of the destination word
+  \param val The 32 bit integer to store as a little endian 32 bit
+             integer.
+
+   This routine should be used when storing the host's representation
+   of a 3s bit integer into memory as a little endian 16 bit integer.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE32B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store32b (uint32_t *dst,
+                                  uint32_t  val)
+  \brief     Stores the host representation of \a val into memory
+             as a 32 bit big endian integer
+  \param dst The address of the destination word
+  \param val The 32 bit integer to store as a big endian 32 bit
+             integer.
+
+   This routine should be used when storing the host's representation
+   of a 32 bit into memory as a little endian 16 bit integer.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE32X)
+/* --------------------------------------------------------------------- *//*!
+
+    \fn           void BSWP__store32x (uint32_t   *dst,
+                                       unsigned int offset,
+                                       uint32_t    val);
+    \brief        Stores a byte swapped version of the 32 bit integer to
+                  memory after a byte offset has been applied.
+    \param    dst The address of the destination word
+    \param offset The byte offset to be applied
+    \param    val The word to byte swap and store
+
+    This routine should be used when storing a 32 bit byte-swapped value
+    into memory. If the value is already in a register, then use
+    \a BSWP__swap32(). If the offset is known to be a constant, it is
+    marginally more efficient to use BSWP_store32().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE32LX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store32lx (uint32_t   *dst,
+                                      unsigned int offset,
+                                      uint32_t    val)
+  \brief        Stores the host representation of \a val into memory
+                as a 32 bit little endian integer
+
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The little endian 32 bitword to store
+
+   This routine should be used when storing the host's representation
+   of a 32 bit integer into memory. If the value is already in a register,
+   then use  \a BSWP__swapl(). If the offset is known to be a constant, it
+   is  marginally more efficient to use BSWP__store32l().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE32BX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store32bx (uint32_t   *dst,
+                                      unsigned int offset,
+                                      uint32_t    val)
+  \brief        Stores the host representation of \a val into memory
+                as a 32 bit big endian integer
+
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The big endian 32 bit integer to store
+
+   This routine should be used when storing the host's representation
+   of a 32 bit integer into memory. If the value is already in a register,
+   then use  \a BSWP__swap32b(). If the offset is known to be a constant, it
+   is  marginally more efficient to use BSWP__store32b().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__SWAP32_LCLXLITTLE)
+/* --------------------------------------------------------------------- *//*!
+
+    \fn        uint32_t BSWP__swap32_lclXlittle (uint32_t val)
+    \brief     Byte swaps a 32 bit word; local representation <=> little
+    \param val The 32 bit word transform from/to the local representation
+               to/from little endian representation
+    \return    The appropriately byte-swapped value of the 32 bit integer
+
+     This routine is used to swap a source word in the local target
+     machine representation's into a little endian representation. Due
+     to the symmetrical nature of the translation, it also works the
+     other way, i.e. swapping a source word in a little endian
+     representation into the local target machine's representation.
+
+     If the local target machine representation is little endian, then
+     this routine is a NOOP.
+
+  \warning
+   This routine is being deprecated. The new name is BSWP__swap32l().
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP32_LCLXBIG)
+/* --------------------------------------------------------------------- *//*!
+
+    \fn        uint32_t BSWP__swap32_lclXbig (uint32_t val)
+    \brief     Byte swaps a 32 bit word; local representation <=> big
+    \param val The 32 bit word transform from/to the local representation
+               to/from big endian representation
+    \return    The appropriately byte-swapped value of the 32 bit integer
+
+     This routine is used to swap a source word in the local target
+     machine representation's into a big endian representation. Due
+     to the symmetrical nature of the translation, it also works the
+     other way, i.e. swapping a source word in a big endian
+     representation into the local target machine's representation.
+
+     If the local target machine representation is big endian, then
+     this routine is a NOOP.
+
+   \warning
+     This routine is being deprecated. The new name is BSWP__swap32b().
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP64)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint64_t BSWP__swap64 (uint64_t val)
+  \brief     Byte swaps a 64 bit word
+  \param val The 64 bit word to swap
+  \return    The byte-swapped value of the 64 bit integer
+
+   This routine should be used when byte-swapping 64 bit quantities that
+   are already in registers. The routines BSWP__load64() and BSWP__store64
+   should by used when loading or storing 64 bit quantities from/into
+   memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP64L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint64_t BSWP__swap64l (uint64_t val)
+  \brief     Ensures that the little endian input 64 bit word \a val is
+             transformed to the host representation.
+  \param val The little endian 64 bit value
+  \return    The host representation of the little endian \a val
+
+   This routine returns the host representation of  known little endian
+   64 bit value, already in a register. The routines BSWP__load64l(),
+   BSWP__store64l() or BSWP__store64xl() should by used when loading or
+   storing known little endian 64 bit quantities from/into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP64B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint64_t BSWP__swap64b (uint64_t val)
+  \brief     Ensures that the big endian input 64 bit word \a val is
+             transformed to the host representation.
+  \param val The big endian 64 bit value
+  \return    The host representation of the big endian \a val
+
+   This routine returns the host representation of  known big endian
+   64 bit value, already in a register. The routines BSWP__load64b(),
+   BSWP__store64b() or BSWP__store64xb() should by used when loading or
+   storing known big endian 64 bit quantities from/into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD64)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint64_t \
+             BSWP__load64 (const uint64_t *src)
+  \brief     Loads a byte swapped version of the 64 bit integer from
+             memory
+  \param src The address of the 64 bit integer to load
+  \return    The byte-swapped value of the 64 bit integer
+
+   This routine should be used when loading 64 bit byte-swapped value
+   from memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD64L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn  \
+   uint64_t BSWP__load64l(const uint64_t *src)
+
+  \brief     Loads the host representation of the known little endian 64
+             bit integer byte from  memory
+  \param src The address of the known little endian 64 bit integer to load
+  \return    The host representation  of the little endian 64 bit integer
+
+   This routine should be used when loading a known little endian 64 bit
+   values from memory and the caller wishes that value to be in the
+   host's representation.
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__LOAD64B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn \
+   uint64_t BSWP__load64b (const uint64_t *src)
+  \brief     Loads the host representation of the known big endian 64
+             bit integer byte from  memory
+  \param src The address of the known bit endian 64 bit integer to load
+  \return    The host representation  of the big endian 64 bit integer
+
+   This routine should be used when loading a known big endian 64 bit
+   values from memory and the caller wishes that value to be in the
+   host's representation.
+
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD64X)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           uint64_t \
+                BSWP__load64x (const uint64_t *src,
+                               unsigned int               offset)
+  \brief        Loads a byte swapped version of the 64 bit integer from
+                memory
+  \param src    The address of the 64 bit integer to load
+  \param offset The byte offset from the source
+  \return       The byte-swapped value of the 64 bit integer
+
+   This routine should be used when loading 64 bit byte-swapped value
+   from memory. If the offset is known to be a constant, it is marginally
+   more efficient to use BSWP__load64().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD64LX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn \
+   uint64_t BSWP__load64lx (const uint64_t *src,
+                                unsigned int               offset)
+  \brief        Loads the host representation of the known little endian 64
+                bit integer byte from  memory.
+  \param src    The address of the known little endian 64 bit integer to load.
+  \param offset The byte offset from the source
+  \return       The host representation  of the little endian 64 bit integer
+
+   This routine should be used when loading a known little endian 64 bit
+   value from memory. and the caller wishes that value to be in the
+   host's representation. If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP__load64l().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__LOAD64BX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn \
+   uint64_t BSWP__load64bx (const uint64_t *src,
+                                          unsigned int               offset)
+  \brief        Loads the host representation of the known bige endian 64
+                bit integer byte from  memory.
+  \param src    The address of the known big endian 64 bit integer to load.
+  \param offset The byte offset from the source
+  \return       The host representation  of the big endian 64 bit integer
+
+   This routine should be used when loading a known big endian 64 bit
+   value from memory. and the caller wishes that value to be in the
+   host's representation. If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP__load64l().
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE64)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store64 (uint64_t *dst,
+                                 uint64_t  val);
+  \brief     Stores a byte swapped version of the 64 bit integer to
+             memory
+  \param dst The address of the destination word
+  \param val The word to byte swap and store
+
+   This routine should be used when storing a 64 bit byte-swapped value
+   into memory.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE64L)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store64l (uint64_t *dst,
+                                  uint64_t  val)
+  \brief     Stores the host representation of \a val into memory
+             as a 64 bit little endian integer
+  \param dst The address of the destination word
+  \param val The 64 bit integer to store as a little endian 64 bit
+             integer.
+
+   This routine should be used when storing the host's representation
+   of a 64 bit integer into memory as a little endian 64 bit integer.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE64B)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        void BSWP__store64b (uint64_t *dst,
+                                  uint64_t  val)
+  \brief     Stores the host representation of \a val into memory
+             as a 64 bit big endian integer
+  \param dst The address of the destination word
+  \param val The 64 bit integer to store as a big endian 64 bit
+             integer.
+
+   This routine should be used when storing the host's representation
+   of a 64 bit into memory as a little endian 64 bit integer.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE64X)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store64x (uint64_t *dst,
+                                     unsigned int         offset,
+                                     uint64_t  val);
+  \brief        Stores a byte swapped version of the 64 bit integer to
+                memory
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The word to byte swap and store
+
+   This routine should be used when storing a 64 bit byte-swapped value
+   into memory. If the value is already in a register, then use
+   \a BSWP__swap64(). If the offset is known to be a constant, it is
+   marginally more efficient to use BSWP_store64().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   an underlying pair of PPC instructions.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE64LX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store64lx (uint64_t *dst,
+                                      unsigned int         offset,
+                                      uint64_t  val)
+  \brief        Stores the host representation of \a val into memory
+                as a 64 bit little endian integer
+
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The little endian 64 bitword to store
+
+   This routine should be used when storing the host's representation
+   of a 64 bit integer into memory. If the value is already in a register,
+   then use  \a BSWP__swapl(). If the offset is known to be a constant, it
+   is  marginally more efficient to use BSWP__store64l().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__STORE64BX)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn           void BSWP__store64bx (uint64_t *dst,
+                                      unsigned int         offset,
+                                      uint64_t  val)
+  \brief        Stores the host representation of \a val into memory
+                as a 64 bit big endian integer
+
+  \param dst    The address of the destination word
+  \param offset A byte offset to apply to dst.
+  \param val    The big endian 64 bit integer to store
+
+   This routine should be used when storing the host's representation
+   of a 64 bit integer into memory. If the value is already in a register,
+   then use  \a BSWP__swap64b(). If the offset is known to be a constant, it
+   is  marginally more efficient to use BSWP__store64b().
+
+
+  \warning
+   Note that \a offset is a byte offset and not an index. This is in
+   keeping with the spirit that this instruction maps directly to
+   the underlying instruction of the PPC.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+/* --------------------------------------------------------------------- */
+#if  !defined(BSWP__SELECT) || defined(BSWP__SWAP64_LCLXBIG)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint64_t \
+             BSWP__swap64_lclXbig (uint64_t val)
+  \brief     Byte swaps a 64 bit word; local representation <=> big
+  \param val The 64 bit word transform from/to the local representation
+             to/from big endian representation
+  \return    The appropriately byte-swapped value of the 64 bit integer
+
+   This routine is used to swap a source word in the local target
+   machine representation's into a big endian representation. Due
+   to the symmetrical nature of the translation, it also works the
+   other way, i.e. swapping a source word in a big endian
+   representation into the local target machine's representation.
+
+   If the local target machine representation is big endian, then
+   this routine is a NOOP.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+
+
+/* --------------------------------------------------------------------- */
+#if !defined(BSWP__SELECT) || defined(BSWP__SWAP64_LCLXLITTLE)
+/* --------------------------------------------------------------------- *//*!
+
+  \fn        uint64_t \
+             BSWP__swap64_lclXlittle (uint64_t val)
+  \brief     Byte swaps a 32 bit word; local representation <=> little
+  \param val The 64 bit word transform from/to the local representation
+             to/from little endian representation
+  \return    The appropriately byte-swapped value of the 64 bit integer
+
+   This routine is used to swap a source word in the local target
+   machine representation's into a little endian representation. Due
+   to the symmetrical nature of the translation, it also works the
+   other way, i.e. swapping a source word in a little endian
+   representation into the local target machine's representation.
+
+   If the local target machine representation is little endian, then
+   this routine is a NOOP.
+                                                                         */
+/* --------------------------------------------------------------------- */
+#endif
+/* --------------------------------------------------------------------- */
+
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+
+/* ---------------------------------------------------------------------- *//*!
+
+    \def  _AT
+    \brief Abbreviation for the attributes of the BSWP inlines
+                                                                          */
+/* ---------------------------------------------------------------------- */
+#define _AT __attribute__((unused))
+
+
+
+
+/* --------------------------------------------------------------------- *\
+ |                                                                       |
+ |                      FUNCTION PROTOTYPES                              |
+ |                                                                       |
+\* --------------------------------------------------------------------- */
+
+
+
+
+
+/* ------------------------------------------------------------------------- *\
+ |                                                                           |
+ |              SINGLE HALF WORD SWAPs, STOREs and LOADs                     |
+ |                                                                           |
+\* ------------------------------------------------------------------------- */
+
+#if                 defined (BSWP__SWAP16)            || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__swap16  (       uint16_t val) _AT;
+#endif
+
+#if                 defined (BSWP__SWAP16L)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__swap16l (       uint16_t val) _AT;
+#endif
+
+#if                 defined (BSWP__SWAP16B)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__swap16b (       uint16_t val) _AT;
+#endif
+
+
+
+#if                 defined (BSWP__LOAD16)            || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__load16  (const uint16_t *src) _AT;
+#endif
+
+#if                 defined (BSWP__LOAD16L)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__load16l (const uint16_t *src) _AT;
+#endif
+
+#if                 defined (BSWP__LOAD16B)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__load16b (const uint16_t *src) _AT;
+#endif
+
+
+#if                 defined (BSWP__LOAD16X)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__load16x (const uint16_t *src,
+                                                  unsigned   int   offset) _AT;
+#endif
+
+#if                 defined (BSWP__LOAD16LX)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__load16lx(const uint16_t *src,
+                                                  unsigned   int   offset) _AT;
+#endif
+
+#if                 defined (BSWP__LOAD16BX)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__load16bx(const uint16_t *src,
+                                                  unsigned   int   offset) _AT;
+#endif
+
+
+
+
+#if                 defined (BSWP__STORE16)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store16 (      uint16_t *dst,
+                                                  uint16_t  val) _AT;
+#endif
+
+#if                 defined (BSWP__STORE16L)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store16l (     uint16_t *dst,
+                                                  uint16_t  val) _AT;
+#endif
+
+#if                 defined (BSWP__STORE16B)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store16b (     uint16_t *dst,
+                                                  uint16_t  val) _AT;
+#endif
+
+
+
+#if                 defined (BSWP__STORE16X)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store16x(      uint16_t *dst,
+                                                  unsigned int     offset,
+                                                  uint16_t  val) _AT;
+#endif
+
+#if                 defined (BSWP__STORE16LX)         || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store16lx(     uint16_t *dst,
+                                                  unsigned int     offset,
+                                                  uint16_t  val) _AT;
+#endif
+
+#if                 defined (BSWP__STORE16BX)         || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store16bx(     uint16_t *dst,
+                                                  unsigned int     offset,
+                                                  uint16_t  val) _AT;
+#endif
+
+
+
+#if                 defined (BSWP__SWAP16_LCLXBIG)    || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__swap16_lclXbig (uint16_t val) _AT;
+#endif
+
+
+#if                 defined (BSWP__SWAP16_LCLXLITTLE) || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO unsigned int BSWP__swap16_lclXlittle(uint16_t val)
+ _AT;
+#endif
+
+/* ------------------------------------------------------------------------- */
+
+
+
+
+/* ------------------------------------------------------------------------- *\
+ |                                                                           |
+ |              SINGLE FULL WORD SWAPs, STOREs and LOADs                     |
+ |                                                                           |
+\* ------------------------------------------------------------------------- */
+#if                defined  (BSWP__SWAP32)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__swap32 (      uint32_t val)        _AT;
+#endif
+
+#if                defined  (BSWP__SWAP32L)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__swap32l (      uint32_t val)        _AT;
+#endif
+
+#if                defined  (BSWP__SWAP32B)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__swap32b (      uint32_t val)        _AT;
+#endif
+
+
+
+#if                defined  (BSWP__LOAD32)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__load32  (const uint32_t   *src)     _AT;
+#endif
+
+#if                defined  (BSWP__LOAD32L)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__load32l (const uint32_t   *src)     _AT;
+#endif
+
+#if                defined  (BSWP__LOAD32B)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__load32b (const uint32_t   *src)     _AT;
+#endif
+
+
+
+#if                 defined (BSWP__LOAD32X)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__load32x(const uint32_t   *src,
+                                                 unsigned int offset)     _AT;
+#endif
+
+#if                 defined (BSWP__LOAD32LX)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__load32lx(const uint32_t   *src,
+                                                  unsigned int offset)     _AT;
+#endif
+
+#if                 defined (BSWP__LOAD32BX)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__load32bx(const uint32_t   *src,
+                                                  unsigned int offset)     _AT;
+#endif
+
+
+
+
+#if                 defined (BSWP__STORE32)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store32(      uint32_t   *dst,
+                                                 uint32_t    val)     _AT;
+#endif
+
+#if                 defined (BSWP__STORE32L)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store32l(     uint32_t   *dst,
+                                                 uint32_t    val)     _AT;
+#endif
+
+#if                 defined (BSWP__STORE32B)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store32b(     uint32_t   *dst,
+                                                 uint32_t    val)     _AT;
+#endif
+
+
+
+#if                 defined (BSWP__STORE32X)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store32x(     uint32_t   *dst,
+                                                 unsigned int offset,
+                                                 uint32_t    val)    _AT;
+#endif
+
+#if                 defined (BSWP__STORE32LX)         || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store32lx(    uint32_t   *dst,
+                                                 unsigned int offset,
+                                                 uint32_t    val)    _AT;
+#endif
+
+#if                 defined (BSWP__STORE32BX)         || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store32bx(    uint32_t   *dst,
+                                                 unsigned int offset,
+                                                 uint32_t    val)    _AT;
+#endif
+
+
+#if                 defined (BSWP__SWAP32_LCLXBIG)    || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__swap32_lclXbig    (uint32_t val)  _AT;
+#endif
+
+
+#if                 defined (BSWP__SWAP32_LCLXLITTLE) || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint32_t BSWP__swap32_lclXlittle (uint32_t val)  _AT;
+#endif
+
+
+
+/* ------------------------------------------------------------------------- *\
+ |                                                                           |
+ |              DOUBLE FULL WORD SWAPs, STOREs and LOADs                     |
+ |                                                                           |
+\* ------------------------------------------------------------------------- */
+#if                 defined  (BSWP__SWAP64)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                              BSWP__swap64 (uint64_t val)    _AT;
+#endif
+
+#if                 defined  (BSWP__SWAP64L)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                              BSWP__swap64l (uint64_t val)   _AT;
+#endif
+
+#if                 defined  (BSWP__SWAP64B)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                              BSWP__swap64b (uint64_t val)   _AT;
+#endif
+
+
+
+#if                 defined  (BSWP__LOAD64)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                              BSWP__load64 (const uint64_t *src)
+                                                                           _AT;
+#endif
+
+#if                 defined  (BSWP__LOAD64L)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                              BSWP__load64l (const uint64_t *src)
+                                                                           _AT;
+#endif
+
+#if                 defined  (BSWP__LOAD64B)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                              BSWP__load64b (const uint64_t *src)
+                                                                           _AT;
+#endif
+
+
+
+#if                 defined (BSWP__LOAD64X)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                             BSWP__load64x(const uint64_t *src,
+                                                 unsigned int         offset)
+                                                                           _AT;
+#endif
+
+#if                 defined (BSWP__LOAD64LX)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                             BSWP__load64lx(const uint64_t *src,
+                                                 unsigned int          offset)
+                                                                           _AT;
+#endif
+
+#if                 defined (BSWP__LOAD64BX)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                             BSWP__load64bx(const uint64_t *src,
+                                                  unsigned int         offset)
+                                                                           _AT;
+#endif
+
+
+
+#if                 defined (BSWP__STORE64)           || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store64 (uint64_t   *dst,
+                                            uint64_t    val) _AT;
+#endif
+
+#if                 defined (BSWP__STORE64L)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store64l(uint64_t   *dst,
+                                            uint64_t    val) _AT;
+#endif
+
+#if                 defined (BSWP__STORE64B)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store64b(uint64_t   *dst,
+                                            uint64_t    val) _AT;
+#endif
+
+
+
+
+#if                 defined (BSWP__STORE64X)          || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store64x(uint64_t   *dst,
+                                            unsigned           int offset,
+                                            uint64_t    val) _AT;
+#endif
+
+#if                 defined (BSWP__STORE64LX)         || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store64lx(uint64_t   *dst,
+                                             unsigned           int offset,
+                                             uint64_t    val)
+                                                                           _AT;
+#endif
+
+#if                 defined (BSWP__STORE64BX)         || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO void         BSWP__store64bx(uint64_t   *dst,
+                                             unsigned           int offset,
+                                             uint64_t    val)
+                                                                           _AT;
+#endif
+
+
+#if                 defined (BSWP__SWAP64_LCLXBIG)    || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                             BSWP__swap64_lclXbig (uint64_t val)
+                                                                          _AT;
+#endif
+
+
+#if                 defined (BSWP__SWAP64_LCLXLITTLE) || !defined(BSWP__SELECT)
+BSWP__EXP_PROTO uint64_t
+                BSWP__swap64_lclXlittle (uint64_t val)     _AT;
+#endif
+
+/* ------------------------------------------------------------------------- */
+#undef _AT
+/* ------------------------------------------------------------------------- */
+
+
+
+/* ------------------------------------------------------------------------- *\
+ |                                                                           |
+ | Pick up the implementation depend versions of the swap, load and store    |
+ | swap routines.                                                            |
+\* ------------------------------------------------------------------------- */
+#if defined(__GNUC__)
+
+
+#if defined (_ARCH_PPC)
+
+#   include "conversion/impl/BSWP.ih.xx-ppc-gcc"
+
+#elif defined (__i386)
+
+#   include "conversion/impl/BSWP.ih.xx-x86-gcc"
+
+#else
+
+#   include "conversion/impl/BSWP.ih.xx-xxx-xxx"
+
+#endif
+
+#else
+
+#include "conversion/impl/BSWP.ih.xx-xxx-xxx"
+
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+
+
+/* ------------------------------------------------------------------------- *\
+ |                                                                           |
+ | The 64 bit swap routines are defined in terms of the 32 bit swap          |
+ | routines. In that sense the code is generic across platforms. Note,       |
+ | however, that the routines do depend on the endianness.                   |
+ |                                                                           |
+\* ------------------------------------------------------------------------- */
+
+
+#ifndef BSWP_NO_GENERIC_64
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__SWAP64)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint64_t BSWP__swap64 (uint64_t val)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped version of the specified value.
+
+   PARAMETERS
+   ----------
+          val: The value to be byte swapped
+
+   RETURNS
+   -------
+   The byteswapped value
+*/
+{
+   U_longlong u;
+
+   /* Byteswap the 2 32 bit integers, then swap the 2 integers themselves */
+   u.i.lo.ui = BSWP__swap32 (val >>32);
+   u.i.hi.ui = BSWP__swap32 (val);
+
+   return u.ull;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD64)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint64_t
+              BSWP__load64 (const uint64_t *src)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 64 bit word from the specified address.
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+   RETURNS
+   -------
+   The byteswapped 64 bit word
+*/
+{
+   U_longlong u;
+
+   u.i.lo.ui = BSWP__load32 (&(((U_longlong *)src)->i.hi.ui));
+   u.i.hi.ui = BSWP__load32 (&(((U_longlong *)src)->i.lo.ui));
+
+   return u.ull;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if               defined (BSWP__LOAD64X)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC uint64_t
+              BSWP__load64x (const uint64_t *src,
+                                   unsigned         int offset)
+/*
+   DESCRIPTION
+   -----------
+   Returns the byte swapped 64 bit word from the specified indexed address
+
+
+   PARAMETERS
+   ----------
+          src: Pointer to the location to load from
+
+       offset: The byte offset to apply to the source address
+
+   RETURNS
+   -------
+   The byteswapped word
+*/
+{
+   U_longlong u;
+
+   /* Get the bits from the lowest and highest addresses */
+   u.i.lo.ui = BSWP__load32x (&(((U_longlong *)src)->i.hi.ui), offset);
+   u.i.hi.ui = BSWP__load32x (&(((U_longlong *)src)->i.lo.ui), offset);
+
+   return u.ull;
+
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE64)  || !defined (BSWP__SELECT)
+/* ---------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store64 (uint64_t   *dst,
+                                  uint64_t    val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 64 bit word value to the specified address.
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+          val: The value to load
+
+   RETURNS
+   -------
+   Nothing
+*/
+{
+   BSWP__store32 (&((U_longlong *)dst)->i.hi.ui, val);
+   BSWP__store32 (&((U_longlong *)dst)->i.lo.ui, val >> 32);
+   return;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+
+
+
+/* ---------------------------------------------------------------------- */
+#if       defined (BSWP__STORE64X)  || !defined (BSWP__SELECT)
+/* --------------------------------------------------------------------- */
+BSWP__EXP_FNC void BSWP__store64x (uint64_t   *dst,
+                                   unsigned           int offset,
+                                   uint64_t    val)
+/*
+   DESCRIPTION
+   -----------
+   Stores the byte swapped 64 bit word value to the specified byte indexed
+   address.
+
+   PARAMETERS
+   ----------
+          dst: Destination address
+
+       offset: A byte offset to apply to the destination address
+
+          val: The value to load
+
+   RETURNS
+   -------
+   Nothing
+*/
+{
+   BSWP__store32x (&((U_longlong *)dst)->i.hi.ui, offset, val);
+   BSWP__store32x (&((U_longlong *)dst)->i.lo.ui, offset, val >> 32);
+
+   return;
+}
+/* ---------------------------------------------------------------------- */
+#endif
+/* ---------------------------------------------------------------------- */
+
+#endif
+
+
+
+/* ------------------------------------------------------------------------- */
+#if ENDIANNESS_IS_BIG
+
+#include "conversion/impl/BSWP.ih.big_endian"
+
+#elif ENDIANNESS_IS_LITTLE
+
+#include "conversion/impl/BSWP.ih.little_endian"
+
+#else
+
+#error BSWP.ih Cannot determine the endianness of the the target machine
+
+#endif
+/* ------------------------------------------------------------------------- */
+
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+
+/* --------------------------------------------------------------------- */
+
+
+#endif

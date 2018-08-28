@@ -1,0 +1,28 @@
+// -*-Mode: C++;-*-
+
+namespace service {
+  namespace net {
+/**
+   @mainpage Net Package
+
+   The @c Net Package is a C++ library intended to encapsulate
+   networking information and setup.  It abstracts away all the libc
+   functions and structures (such as @c setsockopt, @c getifaddrs, and
+   @c struct @c ifaddrs) into these classes which have simpler
+   signatures and options.  This sacrifices some flexibility, but these
+   classes should work for at least 90% of networking usage.
+
+   The classes are:
+     - Interface -- Encapsulate a network interface.
+     - Endpoint -- Encapsulate a single network socket.
+     - Socket -- IPV4 Network Datagram socket transmit/receive semantics.
+     - Multicast -- Encapsulate a multicast network socket.
+     - MacAddress -- Hold and pretty-print a MAC address.
+
+
+
+*/
+
+
+  }
+}

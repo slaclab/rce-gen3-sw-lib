@@ -1,0 +1,68 @@
+#ifndef ALIAS_H_XX_XXX_SCC
+#define ALIAS_H_XX_XXX_SCC
+
+/* --------------------------------------------------------------------- *//*!
+  
+  \file   Alias.h.xx-xxx-scc
+  \brief  Defines a set of macros used to create function aliases for
+          Solaris under the SUN CC compiler
+  \author JJRussell - russell@slac.stanford.edu
+
+\verbatim
+  CVS $Id
+\endverbatim
+                                                                         */
+/* --------------------------------------------------------------------- */
+
+
+
+/*
+ *  WARNING
+ *  -------
+ *  This file is not meant to be included directly by user code. Rather the
+ *  platform neutral "Alias.h" should be used.
+ *
+ *  ABSTRACT
+ *  --------
+ *  This provides a way to declare ALIAS for symbols to the CC compiler.
+ *  The tactic taken is to drop a shard of assembly code which defines the
+ *  alias symbol and sets it equal to another name. Since SUN does not permit
+ *  the usage of asm outside the context of a routine, a bogus routine must be
+ *  invented to contain the asm directives.
+ *
+ *  USAGE
+ *  -----
+ *  Suppose one has a facility ORG_ containing the routines ORG_get, ORG_set.
+ *  Aliases ALIAS_get and ALIAS_set can be created using the following
+ *  prescription.
+ * 
+ *  ALIAS_BEG (ORG_)
+ *  ALIAS_FNC (ORG_get, ALIAS_get)
+ *  ALIAS_FNC (ORG_set, ALIAS_set)
+ *  ALIAS_END (ORG_)
+ *
+ *  TARGET
+ *  ------
+ *  This works only for SUNs, with the SUN native compiler.
+ *
+ */
+
+
+#define ALIAS_BEG(_container)                     \
+extern "C"                                        \
+{                                                 \
+  void _container ## alias_container(void);       \
+}                                                 \
+  void _container ## alias_container(void)        \
+  {
+
+#define ALIAS_FNC(_return_type, _name, _alias)    \
+    asm (".global " # _alias "\n"                 \
+         ".type "  # _alias  ",#function \n"      \
+         # _alias " = " # _name);
+
+#define ALIAS_END(_container)                     \
+  }
+
+#endif
+

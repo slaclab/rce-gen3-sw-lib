@@ -1,0 +1,12 @@
+/** @defgroup datastructure Data Structures
+    @brief Miscellaneous data structures.
+
+    In this package we have various non-STL data structures. They are
+    implemented here due to requirements of efficiency or interface
+    that can't be satisfied by the STL containers.
+*/
+
+/** @namespace tool::dataStructure
+    @brief Package namespace.
+    @ingroup datastructure
+*/

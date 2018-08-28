@@ -1,0 +1,76 @@
+#ifndef INLINE_H_XX_XXX_SCC
+#define INLINE_H_XX_XXX_SCC
+
+/* --------------------------------------------------------------------- *//*!
+  
+  \file   Inline.h.xx-xxx-gcc
+  \brief  Defines a set of macros used to be used when defining inlines
+          for the SUN CC compiler
+  \author JJRussell - russell@slac.stanford.edu
+
+\verbatim
+
+  CVS $Id
+\endverbatim
+                                                                         */
+/* --------------------------------------------------------------------- */
+
+
+/*
+ *  ABSTRACT
+ *  --------
+ *  Implements the GCC method of declaring functions inline. See the 
+ *  interface definition file 'inline.h' for more complete details.
+ *
+ *  WARNING
+ *  -------
+ *  This file is not meant to be directly included in a user's program.
+ *  The interface file 'inline.h' is the generic publically supported
+ *  interface definition.
+ *
+ *  Also note that there is absence of the usual self-including protection
+ *  mechanism. This file is meant to be multiply included and provisions
+ *  have been made for this. So don't add any self-including protection
+ *  because you think someone forgot!
+ *
+ *  HISTORY
+ *  -------
+ *  08-12-00 jjr - Created
+ *  13-12-00 jjr - Completed the full 2x2 matrix (usr/imp & ext/lcl)
+ *  25-01-03 jjr - Added EXP symbol, while EXT is not wrong, it is rarely
+ *                 useful
+
+ */
+
+
+
+/* This set is used to declare EXTERNS in the implementation file */
+#define INLINE_IMP_EXT_PROTO
+#define INLINE_IMP_EXT_FNC
+
+
+/* This set is used to declare EXTERNS in  user files */
+#define INLINE_USR_EXT_PROTO    static inline
+#define INLINE_USR_EXT_FNC      static inline
+
+/* This set is used to declare EXPORTS in the implementation file */
+#define INLINE_IMP_EXP_PROTO
+#define INLINE_IMP_EXP_FNC
+
+
+/* This set is used to declare EXPORTS in  user files */
+#define INLINE_USR_EXP_PROTO    static inline
+#define INLINE_USR_EXP_FNC      static inline
+
+
+/* This set is used to declare STATIC inlines in implemenatation files*/
+#define INLINE_IMP_LCL_PROTO    static inline
+#define INLINE_IMP_LCL_FNC      static inline
+
+
+/* This set is used to declare STATIC inlines in user files*/
+#define INLINE_USR_LCL_PROTO    static inline
+#define INLINE_USR_LCL_FNC      static inline
+
+
+#endif

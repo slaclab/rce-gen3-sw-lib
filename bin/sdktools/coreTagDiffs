@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# coreTagDiffs
+# 
+# Generate a set of log differences between two tags
+#
+# Tags are either snapshots or production tags and are 
+# relative to $SVNROOT/core_tags
+#
+# Example:  coreTagDiffs prod/V0.0.1 snapshot/20140606_210156
+
+declare oldTag
+declare newTag
+declare revs
+declare -r tagRoot=${SVNROOT}/core_tags
+declare packages="bin bootstrap cm driver platform service tool xilinx"
+
+usage() {
+    echo "usage: ${BASH_SOURCE} <tag1> <tag2>"
+    echo ""
+    echo "Generate the difference log between two tags."
+    echo "Tags are either snapshots or production, and are relative"
+    echo "to \$SVNROOT/core_tags"
+    echo ""
+    echo "Example:  ${BASH_SOURCE} prod/V0.0.1 snapshot/20140625_1425"
+    exit 1
+}
+
+addRevs() {
+    # Add to the set of revisions for a directory
+    local new=$1
+    local old=$2
+    revs+="$(svn mergeinfo --show-revs eligible ${tagRoot}/${new} ${tagRoot}/${old}) "
+}
+
+gather() {
+    # Workspace differences
+    addRevs ${newTag} ${oldTag}
+    # Package differences
+    for p in ${packages}; do
+        addRevs ${newTag}/${p} ${oldTag}/${p}
+    done
+}
+
+reduce() {
+    # Sort and unique the revisions
+    local nr=$(echo $revs | sed 's/ /\n/g' | sort | uniq)
+    revs=${nr}
+}
+
+display() {
+    # log each revision
+    for r in ${revs}; do
+        svn log -${r} -v ${SVNROOT}
+    done
+
+}
+
+if [ ${#SVNROOT} -le 1 ]; then
+  echo "The SVNROOT variable must be set for this script to work"
+  usage
+fi
+
+if [ $# -ne 2 ]; then 
+  echo "bad bad"
+  exit
+fi
+
+oldTag=$1
+newTag=$2
+
+gather
+reduce
+display
+
+

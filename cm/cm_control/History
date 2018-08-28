@@ -1,0 +1,6 @@
+11-Aug-2010	weaver  Tag V03-01-00.
+28-May-2009	weaver	Tag V03-00-00.  Consistent with cim V03-00-00.  ATLAS RCE workshop (CIM_HUB C03).
+07-Jan-2009	weaver	Tag V02-00-00.  Consistent with cim V02-00-00.  
+			Removed UploadTask in favor of rceusr/console/Upload.
+05-Jan-2009	weaver	Tag V01-02-00.  Consistent with cim V01-02-00.
+06-Nov-2008	weaver	Tag V01-01-00.  Consistent with cim V01-01-XX.

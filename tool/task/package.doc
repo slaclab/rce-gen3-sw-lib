@@ -1,0 +1,25 @@
+// -*- Mode: C;-*-
+/**
+
+  @mainpage Task Interface
+
+  A TASK is defined as a pure RTEMS task along with its corresponding
+  (dynamically linked) executable code.  That executable code is
+  specified by its (file based image), which is loaded and linked
+  before its corresponding task is started.
+
+  Once started (through ::Task_Run), the resulting task may be treated
+  as any other RTEMS task with the exception of deletion, which must
+  be accomplished by calling ::Task_Stop.
+
+  @note
+   - The executable code associated with the task must have been
+     *statically* linked with library libtaskstub.a which establishes
+     its correct RTEMS entry point.
+   - The specification of the task to be started is determined by
+     the ::Task_Attributes structure. 
+
+  The RTEMS SDK provides a wrapper to perform the static link of
+  a user task with libtaskstub.a: @c rtems_task.
+
+*/

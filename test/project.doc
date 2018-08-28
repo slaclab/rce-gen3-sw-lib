@@ -1,0 +1,9 @@
+/**
+@mainpage Overview
+This project, test, contains small snippets of useful code organized by category. Each category has its own package with its own namespaces inside the test namespace.
+*/
+
+/**
+@brief Project namespace.
+*/
+namespace test {}

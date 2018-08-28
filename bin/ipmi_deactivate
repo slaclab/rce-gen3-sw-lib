@@ -1,0 +1,28 @@
+#!/bin/bash
+#!
+# @brief  Deactivate the payload (initiate M4->M5 transition)
+#
+# @author R. Claus
+#
+# @date   5 May, 2012 -- Created
+#
+# $Revision: $
+#
+# @verbatim
+#                               Copyright 2012
+#                                     by
+#                        The Board of Trustees of the
+#                      Leland Stanford Junior University.
+#                             All rights reserved.
+# @endverbatim
+#
+
+cmd=${0##*/}
+
+case $# in
+0|1)  echo "usage: $cmd <shelf> <slot>" >&2;  exit 1
+esac
+
+#t=`printf "0x%02x" $(( 128+$2+$2 ))`
+t=`ipmi_get_addr $1 $2`
+ipmitool-pps -I lan -H $1-sm -t $t -b 0 -A NONE picmg policy set 0 2 1

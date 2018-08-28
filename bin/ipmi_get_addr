@@ -1,0 +1,27 @@
+#!/bin/bash
+#!
+# @brief  Translate Physical Slot number to IPMB address
+#
+# @author J.G. Thayer
+#
+# @date   16 June, 2014 -- Created
+#
+# $Revision: $
+#
+# @verbatim
+#                               Copyright 2012
+#                                     by
+#                        The Board of Trustees of the
+#                      Leland Stanford Junior University.
+#                             All rights reserved.
+# @endverbatim
+#
+
+cmd=${0##*/}
+
+case $# in
+0|1)  echo "usage: $cmd <shelf> <slot>" >&2;  exit 1
+esac
+
+t=`printf "0x%02x" $2`
+ipmitool-pps -I lan -H $1-sm -t 0x20 -b 0 -A NONE raw 0x2c 0x01 0x00 0x00 0x03 $t 0x00 | awk '{print "0x"$3}'

@@ -1,0 +1,92 @@
+#!/bin/bash
+#
+# Compile one or more C++ source files into an object file
+#
+# For usage, invoke with -h or --help
+
+PROGNAME=${0##*/}
+
+# haveArch is set after the architecture is set.  If another arch is also 
+# set, then an error is declared 
+declare -i haveArch=0
+
+declare CXXFLAGS=
+declare GXX=
+declare SOURCEFILE=
+declare EXTRAOPTS=
+
+declare -i verbose=0
+
+usage()
+{
+    cat <<EOF
+        Usage: ${PROGNAME} <options> <c++files> [<another_file>] [extra_compiler_opts]
+
+        Compile one or more C++ files with the required compiler arguments for running with RTEMS
+
+EOF
+    cat <<EOF | column -s\& -t
+        Options: &
+        -h|--help & show this output
+        -v|--verbose & print the compilation statement
+EOF
+    exit -1
+}
+
+abort() 
+{
+    echo $*
+    exit -1
+}
+
+
+armSetup()
+{
+    [ ${haveArch} -ne 0 ] && abort "armSetup: architecture is already set" || haveArch=1
+
+    GXX=arm-rtems4.11-g++
+
+    CXXFLAGS+="-Wno-psabi -fno-zero-initialized-in-bss -fPIC "
+    CXXFLAGS+="-march=armv7-a -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp "
+    CXXFLAGS+="-DEXPORT= "
+}
+
+setup()
+{
+    local -i doCore=0
+
+    # first char + ==> Scanning mode = stop after non-option to avoid
+    # parsing of extra options for compiler as part of this script's 
+    # options
+    SHORTOPTS="+hv"
+    LONGOPTS="help,verbose,arm,core,board:,bsp:"
+    OPTS=$(getopt -s bash --alternative --options $SHORTOPTS \
+         --longoptions $LONGOPTS -- $@ )
+
+    eval set -- ${OPTS}
+
+    while true; do
+        case "$1" in
+            -h|--help)    usage;         shift;;
+            -v|--verbose) verbose=1;     shift;;
+            --core)                      shift;;
+            --arm)                       shift;;
+            --board)                     shift 2;;
+            --bsp)                       shift 2;;
+            --)                          shift;  break;;
+            *)                           shift;  break;;
+        esac
+    done
+
+    armSetup
+    
+    SOURCEFILE=$1; shift;
+    EXTRAOPTS=${*}
+}
+
+setup "$@"
+
+[ ${#SOURCEFILE} -eq 0 ] && usage
+[ ${haveArch} -eq 0 ]    && usage
+[ ${verbose} -ne 0 ]     && set -o xtrace
+${GXX} -c ${SOURCEFILE} ${EXTRAOPTS} ${CXXFLAGS}

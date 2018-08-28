@@ -1,0 +1,37 @@
+/*!@file    memory.ld
+*
+*  @brief   Linker script for defining memories in the system
+*
+*           Use ld with -L to pick up the appropriate instance
+*
+*  @author  R. Claus -- REG/DRD - (claus@slac.stanford.edu)
+*
+*  @date    January 10, 2012 -- Created
+*
+*  $Revision: 1241 $
+*
+*  @verbatim                    Copyright 2012
+*                                      by
+*                         The Board of Trustees of the
+*                       Leland Stanford Junior University.
+*                              All rights reserved.
+*  @endverbatim
+*/
+
+/*
+The file memory.ld is now generated using the preprocessor and memory.ld.in.
+TODO: This step needs to be automated by the build system.
+cpp -imacros tool/memory/src/armCA9/memRegionConstants.h -P -C -nostdinc make/sw/arm/rceCA9/memory.ld.in -o make/sw/arm/rceCA9/memory.ld
+*/
+
+/* Note that absolute symbols set via PROVIDE_HIDDEN() will have the
+   wrong kind of relocations generated for their references in code,
+   although their use in linker scripts works.
+*/
+/* Create MMUTable synonym to satisfy Xilinx code */
+PROVIDE(MMUTable = MMU_START);
+
+PROVIDE(bsp_translation_table_base = MMUTable);
+
+PROVIDE_HIDDEN(RtsRegionStart = RTS_START);
+

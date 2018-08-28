@@ -1,0 +1,10 @@
+projects :=
+projects += xilinx
+projects += bootstrap
+projects += platform
+projects += tool
+projects += driver
+projects += service
+projects += ppi
+projects += configuration
+projects += cm

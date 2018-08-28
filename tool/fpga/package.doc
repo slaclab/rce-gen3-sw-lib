@@ -1,0 +1,8 @@
+/** @defgroup fpga FPGA
+    @brief Load a firmware definition (.bit) file onto an FPGA
+*/
+
+/** @namespace tool::fpga
+    @brief Package namespace.
+    @ingroup fpga
+*/

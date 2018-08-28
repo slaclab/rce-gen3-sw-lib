@@ -1,0 +1,12 @@
+[Unit]
+Description=Configure and start the dtm dhcp server
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/dtm_dhcp.sh
+ExecStop=/usr/bin/killall /usr/bin/dtm_dhcp.sh
+Restart=no
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,8 @@
+/** @defgroup conversion Low-level conversion
+    @brief Byte swapping, type aliasing and other low tricks.
+*/
+
+/** @namespace tool::conversion
+    @brief Package namespace.
+    @ingroup conversion
+*/

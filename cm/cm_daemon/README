@@ -1,0 +1,14 @@
+The files within this directory are intended to be installed into the linux
+filesystem tree as follows:
+
+/etc/systemd/system/fmd.service
+/etc/systemd/system/remotesvc.service
+/etc/systemd/system/shelf_ping.service
+/etc/systemd/system/dtm_ip.service
+/usr/bin/dtm_ip.sh
+/etc/dhcpd.dtm.conf			template for DHCP server config
+
+systemctl enable fmd.service
+systemctl enable dtm_ip.service
+systemctl enable remotesvc.service
+systemctl enable shelf_ping.service

@@ -1,0 +1,359 @@
+/** @defgroup memory Memory
+    @brief Dynamic storage allocation, memory pools and cache control.
+*/
+
+/** @namespace tool::memory
+    @brief Package namespace.
+    @ingroup memory
+*/
+
+
+namespace tool {
+
+namespace memory {
+
+/**
+  @mainpage Memory package
+  @section summary Summary
+
+  The @c %memory package provides:
+  - Cache manipulation.
+  - Control of memory properties:
+    - Page size (1 MB or 4 KB).
+    - Cached or uncached, read-only or read-write, device or normal, etc.
+  - Access to named memory regions defined by the RPT group.
+  - Access to certain system device registers.
+  - Linux kernel module for access to the On-Chip Memory.
+  - Linux kernel module for DMA buffer mamangement.
+
+  There are two package libraries: "memory" with C++ code,
+  "mem" with C code. Use the header files memory.h and mem.h, respectively.
+
+  @if development
+  There is also a "umem" library, a subset of "mem" for use
+  by U-Boot.
+  @endif
+
+  The cache manipulation and memory property functions
+  use privileged instructions. They are most useful under RTEMS and in
+  boot loaders which both run in supervisor mode. Under standard Linux
+  only kernel code runs in supervisor mode; using these functions
+  outside of the kernel will cause exceptions. The cache manipulation
+  functions may prove useful in kernel modules but you should avoid
+  using the other functions there. Under Linux MMU management is
+  closely tied to process managment and all MMU manipulation is
+  assumed to be done through standard kernel functions.
+
+  This package also sets up a set of standard RTEMS memory regions
+  with the locations, sizes, default page sizes and default memory
+  attributes defined by the RPT group. It provides functions which
+  allocate storage in the region of your choice. An allocation
+  generally lasts until the system is rebooted. However, an undo
+  operation is provided which allows the last, and ONLY the last,
+  allocation in a given region to be rescinded. This is intended for
+  the case in which an allocation has to be done before you know
+  whether you really need it.
+
+  @section cachemanip Cache manipulation
+
+  The Zynq provides two levels of caching. Each processor core has its
+  own Level 1 data cache and L1 instruction cache. The Zynq chip as a
+  whole has a Level 2 combined data+instruction cache sitting between
+  the L1 caches and main memory. Data is moved from cache to cache and
+  between caches and main memory in indivisible units of 32 bytes
+  called cache lines. Cache line boundaries in main memory are fixed;
+  the n'th cache line includes addresses 32*n through 32*n + 31.
+
+  The data cache manipulation functions operate on both the L1 data and
+  L2 caches. They require the caller to provide a valid virtual
+  address for the L2 cache controller. That address is obtainable from
+  another function in the memory package.
+
+  The instruction cache manipulation functions operate only on the
+  processor's L1 instruction cache and on its branch prediction
+  cache. 
+
+  Two basic data cache operations are provided; store and invalidate.
+  "Store" means to make sure that data in the caches is written to
+  main memory. "Invalidate" means to mark the cache data as irrelevant
+  which makes the storage it uses in the cache available for
+  re-use. Invalidation doesn't write anything to main memory. In fact
+  it may prevent the updating of main memory if you invalidate cache
+  lines holding data that has not yet made it to main
+  memory. Therefore be careful not to invalidate cache lines holding
+  data that you want to keep unless you've previously performed a
+  store operation covering those cache lines.
+
+  In ARM documentation storing is called "cleaning" and invalidation
+  is called "flushing".
+
+  For the instruction cache only invalidation operations are provided
+  since cached instructions are never written to main memory, only
+  read. These operations also clear the cached branch predictions
+  for the affected virtual addresses.
+
+  For both the data cache and instruction cache operations there are
+  functions which operate on the whole cache and functions which operate
+  on a contiguous set of virtual addresses (actually on the set of cache
+  lines which overlap the given set of addresses).
+
+  @section memprops Memory properties (or attributes)
+
+  These functions are used to maintain a single page table used for
+  the entire system, not one table per task/process as under Linux.
+  Two page sizes are allowed: 1 MB and 4 KB. You can convert a range
+  of virtual addresses from 1 MB pages to 4 KB pages but not the other
+  way around, provided that the range starts and ends on 1 MB
+  boundaries. There is no address translation; virtual addresses are
+  the same as physical addresses. The page table also determines the
+  following properties of each address:
+  - Cached or uncached.
+  - Writeable or read-only.
+  - Shared or unshared.
+  - Device memory or not.
+  - Executable or not.
+  - Handshake or not.
+
+  The memory package provides functions which allow you to determine
+  the property flags for given areas of memory and to set them as
+  well. When changing the property flags its important to remember
+  that all locations in the same page must have the same properties,
+  so the functions in the package will affect all pages that overlap the
+  given set of addresses.
+
+  Modern computers employ techniques designed to compensate for the
+  long time it takes to read and write main memory, compared to the
+  time it takes to execute instructions that use only processor
+  registers. They may reorder reads and writes, combine multiple reads
+  (writes) into a single read (write), delay reads and writes to main
+  memory by using fast caches or buffers between it and the
+  processor. They amy read locations not requested by the executing
+  code in the expectation that they'll be requested shortly.
+
+  Such techniques are fine for main memory ("normal" memory in ARM
+  parlance) but can be dangerous for addresses that are mapped to
+  device registers.  Many devices implement operations in which
+  register A has to be written to (or read from) before register B;
+  operation re-orderings and combination could cause device
+  malfunctions. Then, too, you don't want a write that's supposed to
+  start an I/O operation to be indefinitely delayed because the
+  value to be stored is cached and not sent out on the memory bus.
+  Finally, devices implementing DMA operations will usually
+  transfer data to and from system RAM without using the caches that
+  the processors use. If a processor reads from a cached region which
+  has just had its data altered by a DMA, that processor may get data
+  from the cache which is now almost certain to be incorrect. If a
+  processor writes to a cached region and then starts an outgoing DMA
+  then the new data may not yet have been written to the DMA buffer
+  when the DMA starts. For these reasons DMA buffers are often put
+  in uncached memory. The alternative is to carefully manage the cache
+  lines for the DMA buffers, storing the appropriate cache lines
+  before outgoing DMAs and invalidating before incoming
+  DMAs.
+
+  Handshake memory ("strongly ordered" in ARM parlance) is a special
+  category of device memory. Ordinary device memory still allows some
+  buffering in between the processor and the device registers; an
+  instruction writing to a device register may finish when the
+  outgoing value is buffered.  With handshake memory the instruction
+  isn't considered complete until the device signals that the outgoing
+  value has actually reached the device register.
+
+  In the Zynq system the processor(s) and I/O devices won't
+  automatically agree on the contents of RAM (be "coherent") unless
+  that RAM's addresses are flagged as shared. (In addition the I/O
+  devices must use a special coherency port called the ACP into
+  RAM.)
+
+  The LDREX and STREX instructions that modern ARM processors use to
+  implement exclusive modification of memory locations won't work
+  unless the locations are normal memory. They ought to be shared as
+  well or exclusiveness makes no sense.
+
+  @note Changing the properties of a section of memory often requires
+  cache manipulation as well. For example, if you change some memory
+  from read-write to read-only you must first store all of its
+  modified ("dirty") data cache lines. If you don't then at some
+  unpredictable time when the system decides to write one of those
+  lines to memory it won't be able to since the memory is now
+  write-proof. The resulting hardware exception will be hard to
+  diagnose since the exception will likely occur far away from the
+  code that performed the write operation that caused the cache line
+  to become dirty. The documentation for mem_setFlags() describes each
+  case where cache manipulation must be done in concert with memory
+  property changes.
+  
+  @section memregions Memory regions
+
+  The current locations, sizes and default memory properties of all
+  regions may be seen by running the Task system:regions.exe from the
+  RTEMS shell.
+
+  Under RTEMS as distributed by the RPT group the Zynq's 4 GB address
+  space is partitioned into a number of regions each of which is
+  intended to serve a particular purpose.  Each region is assigned a
+  starting address, size, default page size and default memory
+  properties. The regions in system RAM at the time of this writing
+  are, in order of increasing starting addresses:
+  - Null catcher, 4 4KB pages at address 0. Neither reads nor writes
+    are allowed (inaccessible). Intended to make most uses of null
+    pointers cause hardware exceptions.
+  - Syslog, 256 4KB pages. Holds a circular text buffer for the system
+    log.
+  - MMU tables, 100 4KB pages. Holds all MMU page tables.
+  - Run-time service, 4 KB pages up to the start of the Workspace
+    section. This is where dynamically loaded libraries, executables
+    and symbol-value tables are placed. RTEMS itself is loaded at the
+    start of this region during startup. The default memory
+    properties are read/write, executable and cached.
+  - Workspace. 1MB pages up to the start of the Uncached region.
+    Default properties: read/write, non-executable and cached. Most
+    of this region is allocated at startup to the RTEMS workspace
+    and the C/C++ heap, but 16 pages are left free for other uses.
+  - Uncached. 1 MB pages up to the end of RAM. The default
+    properties are read/write, non-executable and uncached.
+    This region is intended for DMA buffers.
+
+
+  Outside of system RAM we have regions for memory-mapped device
+  registers almost all of which are given the memory properties
+  device, read/write, shared, uncached and non-executable. The
+  exception is the the 256 KB On-Chip Memory (a static RAM) which
+  lacks the device property and is cached. Most of the device regions have 1MB
+  pages, again except for the OCM which has 4KB pages (as does the
+  Highreg region next to it due to constraints on the structure of MMU
+  tables).
+  - Socket. Firmware objects used for protocol plugins.
+  - AXI0 Test. Adresses set aside for experimental firmware accessed
+    using the Zynq's AXI port 0.
+  - Firmware version control. Firmware version readout plus a few
+    control registers.
+  - BSI. Set aside for the BootStrap Information.
+  - AXI1 Test. Experimental firmware accessed using AXI port 1.
+  - User Dev. Non-PPI user-defined firmware.
+  - User PPI. User-defined protocol-plugin firmware.
+  - IOP. Zynq I/O Peripheral registers. UART, timers, USB, etc.
+  - Static. Zynq Static Memory controllers for flash devices or static RAM.
+  - High registers. Control registers for the Zynq Processor
+    System. SD card controller, etc.
+  - OCM. On-Chip Memory.
+  
+  @section kernelmods Kernel modules (Linux only)
+
+  These modules are designed to be used under ArchLinux on the Zynq.
+  They offer access to the Zynq On-Chip Memory and to DMA buffers
+  allocated using the Linux kernel's DMA API.
+
+  @subsection onchipmem On-chip memory (OCM)
+
+  The OCM is a 256 KB static RAM mapped into the Zynq's physical
+  address space apart from the system DRAM. Attempts to access the OCM
+  via mmap() calls using /dev/mem result in the OCM being mapped into
+  the process address space as uncached device memory. It turns out
+  that mmap() on /dev/mem will always do this for physical addresses
+  above the top of normal system RAM. Most applications will need to
+  map the OCM as normal cached memory for performance. Also, the
+  exclusive access instructions LDREX and STREX need their target
+  addresses to be in normal memory in order to work properly. Lastly,
+  the OCM should be mapped as shared so that the processor(s) and
+  firmware using the ACP can all see a coherent view of the contents.
+
+  The kernel module ocm.c creates the device /dev/ocm which when used with
+  mmap() maps the OCM with the correct properties: normal, cached,
+  read-write, non-executable and shared.
+
+  @subsection dmabuffers DMA buffers
+
+  A DMA buffer on the Zynq needs to be physically contiguous, that is,
+  it must occupy a set of physical addresses with no holes. There are
+  also alignment requirements. The Linux kernel offers a DMA buffer
+  management API to device drivers and modules. The kernel module
+  dmabuf.c uses that API and creates the device /dev/dmabuf which may
+  be used with mmap() to make DMA buffers accessible to user
+  processes. The file dmabufapi.h offers a user API which encapsulates
+  the use of /dev/dmabuf.
+
+  @section examples Examples
+  For the sake of brevity these examples omit error checking.
+
+  @subsection propchangeexample Property change with cache manipulation (RTEMS or boot code)
+  Before changing a region of address space from cached
+  to uncached there must be no valid cache lines for that
+  region. There must never be cache hits for uncached regions.
+  @code
+  #include "memory/mem.h"
+  mem_storeDataCacheRange             (A, B, mem_mapL2Controller());
+  mem_invalidateDataCacheRange        (A, B, mem_mapL2Controller());
+  mem_invalidateInstructionCacheRange (A, B);
+  mem_setFlags                        (A, B, MEM_UNCACHED);
+  @endcode
+
+  @subsection regionallocexplodeexample Allocating memory from a Region and changing its page size.
+  Allocate 1 page from the Workspace region. Since the Workspace default page
+  size is 1 MB the allocated storage will begin and end on a 1 MB boundary
+  as required by mem_explode().
+  @code
+  #include "memory/mem.h"
+  uint32_t const n   = mem_Region_pageSize(MEM_REGION_WORKSPACE);
+  char*    const ptr = mem_Region_alloc(MEM_REGION_WORKSPACE, n);
+  mem_explode((uint32_t)ptr, (uint32_t)ptr + n);
+  @endcode
+
+  @subsection ocmmappingexample Mapping the OCM process address space (Linux)
+  Assume that the ocm module has been loaded.
+  @code
+  #include <sys/mman.h>
+  #include <sys/stat.h>
+  #include <sys/types.h>
+  #include <fcntl.h>
+  #include <unistd.h>
+
+  #define OCM_SIZE     65536 // Use only 1/4 of the OCM
+
+  int const fd1 = open("/dev/ocm", O_RDWR);
+  unsigned* const ocm =
+    (unsigned*)mmap(NULL, OCM_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED, fd1, 0);
+  @endcode
+
+  @subsection dmabufferexample Creating and deleting a DMA buffer (Linux)
+  Assume that the dmabuf module is loaded.
+  @code
+  #include "memory/platform/dmabufapi.h"
+
+  dma_BufferDesc buffer[1];
+  int const fd = dma_open();
+  buffer[0].size = 4096;
+  int         status = dma_allocateBuffer(fd, &buffer[0]);   // Create
+  char* const buf0   = dma_mapBuffer     (fd, &buffer[0]);   // Get access
+  ...
+  status             = dma_unmapBuffer   (&buffer[0], buf0); // Forsake access
+  status             = dma_freeBuffer    (fd, &buffer[0]);   // Destroy
+  dma_close(fd);
+  @endcode
+  
+
+
+  @if development
+  @section developer Developer's info
+
+  @subsection svn Location in Subversion repository
+
+  The source code is located under tool/memory/.
+
+  @subsection impl Implementation notes
+
+  The cache and MMU operations are performed using instructions
+  calling the standard ARM coprocessor number 15. These instructions
+  are valid only in supervisor mode.
+
+  The memory allocation inside the RPT-defined regions is performed
+  using a simple bump-pointer algorithm.
+
+  @subsection tests Unit tests
+  TBD
+
+  @endif
+ 
+*/
+
+}}

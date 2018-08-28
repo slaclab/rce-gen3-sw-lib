@@ -1,0 +1,7 @@
+testElf loads an object made from testObject.c and performs a number
+of symbol lookups on it.
+
+testLinker calls lnk_load() and lnk_loadBySoname() using objects
+made from {one, two, three, four, five, six}.c using the linker script
+testobj.ld.
+

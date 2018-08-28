@@ -1,0 +1,78 @@
+// -*-Mode: C;-*-
+/**
+   @mainpage Ldr Facility
+
+   The @c Ldr Facility provides support for two basic functions:
+   - performing symbol lookup from the System Name Table (SNT) and the
+     Application Name Table (ANT), and
+   - dynamically loading and managing ELF files and images, primarily
+     through the dynamic linker
+
+   While the interface to @c Ldr is a pure C interface, it may
+   be used by C++ classes and methods.
+
+   The public methods and their signatures are:
+     
+   - ::Ldr_path Ldr_Assign(Ldr_namespace, Ldr_path)
+   - ::Ldr_path Ldr_Map(Ldr_name, char* buffer)
+   - ::Ldr_path Ldr_Rename(Ldr_namespace, Ldr_path)
+   - ::Ldr_path Ldr_Remove(Ldr_namespace)
+   - ::Ldr_elf* Ldr_Load(Ldr_name, Ldr_status*)
+   - ::Ldr_elf* Ldr_Lookup(Ldr_name)
+   - void Ldr_Fixup(Ldr_elf*)
+   - ::Ldr_status Ldr_LoadRtems(Ldr_name)
+   - uint8_t* Ldr_Offset(Ldr_elf*)
+   - uint8_t* Ldr_Entry(Ldr_elf*)
+   - uint32_t Ldr_Sizeof(Ldr_elf*)
+   - ::Ldr_name Ldr_Name(Ldr_elf*)
+   - uint8_t* Ldr_Offset(Ldr_elf*)
+   - ::Ldr_status Ldr_Install(Ldr_elf*)
+
+----
+
+   @section namespace Namespaces
+
+   The dynamic loader locates images by employing the binding of a logical
+   name, or namespace, to a specific directory on the target filesystem.
+
+   - A namespace is a string identifier used to associate a set of target
+   images with some user defined category or organizational structure
+
+   - The namespace string must:
+     -# be unique over the set of all assigned namespaces in a running system.
+     -# not contain the reserved character ":".
+     
+   - The namespace gets mapped at runtime to a path on the target
+   filesystem.
+     - This mapping may be stored in a configuration file.
+
+   - The set of images associated with a namespace must all reside in the
+   same directory on the target filesystem.
+
+   - dynamic images must specify a namespace and filename at link time
+   using the @c -soname linker flag.
+
+   - The format of the argument to the @c -soname linker flag must be:
+     - \<namespace\>:\<image_filename\>
+
+   @note Namespaces for the Ldr facility are distinct from the C++ concept
+   of namespaces.
+
+----
+   
+   @section image_name Image Names
+
+   A name must have the following form: \c namespace:image. Where
+   "namespace" corresponds to a string previously assigned to a file
+   path (see ::Ldr_Assign), while \c ":" is a reserved character which
+   delineates the end of the namespace and the beginning of the
+   "image". A name must contain at least one delineator. ::Ldr_Map
+   will substitute the namespace for its assigned path (see
+   ::Ldr_Assign), discard the delineator and
+   concatenate the remaining string (i.e. "image") to form a fully
+   resolved path to its corresponding image. This process is used by
+   ::Ldr_Load to find the image file to load.
+   
+   
+ */
+

@@ -1,0 +1,11 @@
+[Unit]
+Description=Fulcrum Switch Daemon
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/fmd -m -b -t -c
+ExecStop=/usr/bin/killall /usr/bin/fmd
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,243 @@
+/**
+  @mainpage COB IPMC Tools and API
+  
+  @section Summary
+  The COB IPMC tools are an API and a series of convienience commands 
+  that can be issued to the COB IPM Controller. These are bridged through 
+  the shelf manager, and do not require the COB network to be active. 
+  In fact, many of these commands will work when the COB is deactivated.
+
+  @section Specifying an RCE address to a COB command
+  As is described in the appropriate usage information, many commands
+  accept one or more <rce_address> arguments. The form of these arguments
+  are the same for all commands and is repeated from the usage message here:
+
+  @code
+  Each <rce address> is of the form: 
+
+  shelfmanager_ip[/slot[/bay[/rce]]]
+
+  Where:
+    shelfmanager_ip: the hostname of the shelf manager or its IP address
+                     WARNING: THIS IS NOT THE SHELF NAME!
+
+               slot: the physical slot number (1-16)
+                     or the case-insensitive keyword ALL
+
+                bay: the bay number (0-7) 
+                     or one of the case-insensitive keywords: 
+                     ALL, CMB, DTM, DPM, RTM, CEN
+
+                rce: the RCE number (0-3)
+                     or the case-insensitive keyword ALL.
+
+    Leaving off the end of the address is the same 
+    as using the keyword ALL for the omitted arguments.
+
+    Examples:
+      egbert-sm/4/3/2
+      egbert-sm/4/3
+      egbert-sm/4/
+      egbert-sm/
+      egbert-sm/4/ALL/2
+      egbert-sm/4/dpm
+      egbert-sm/4/DPM/0
+      172.21.6.112/4/3/2
+      
+  @endcode
+
+  @section RCE Reset Command
+  @code
+  cob_rce_reset <rce address> [<rce_address> ...]
+  @endcode
+
+  Send hardware reset the RCEs specified by <rce_address>. 
+  This will pull the harware reset line on the RCEs' FPGA.
+
+  @section COB Dump Command
+  @code
+  cob_dump [OPTIONS] <rce_address> [<rce_address> ...]
+  @endcode
+   Produces (sort-of-)human readable summaries of the quantities
+   monitored by the IPMC. 
+
+   Where OPTIONS are:
+      --bay   Dump Bay Information
+      --rce   Dump RCE Information
+      --gpio  Dump Bay GPIO Information
+      --rtm   Dump RTM information
+      --cen   Dump CEN information
+      --all   Dump ALL of the above information
+
+
+  @section COB BSI Dump Command
+  @code
+  cob_dump_bsi [OPTIONS] <rce_address> [<rce_address> ...]
+  @endcode
+   Produces (sort-of-)human readable representations of the 
+   RCE BootStrap Interface. Not all BSI areas are available 
+   on DPMs, but requesting those produces no output.
+   
+   Where the OPTIONS are:
+       --raw     Dump of raw BSI contents
+       --rce     Dump RCE information
+       --cluster Dump Cluster information
+       --switch  Dump COB switch configuration information
+       --shelf   Dump shelf IP information
+       --fabric  Dump shelf fabric map
+       --all     Dump all of the above information except raw
+                 (can be issued with --raw to get raw and all)
+
+  @section COB Refresh Shelf Info
+  @code
+  cob_refresh_shelf_info [OPTIONS] <rce address> [<rce_address> ...]
+  @endcode
+   Refreshes the Shelf FRU information cached in the IPMC. 
+   By default, this command will reset all the RCEs in
+   the COB after the the refresh. 
+  
+   The most common use of this command is to reset the Shelf IP
+   Information in the IPMCs after updating it in the Shelf FRU
+   EEPROM through the Shelf Manager.
+  
+   Where the [OPTIONS] can be:
+      --no-reset, -n   Don't reset the RCEs after refreshing the IPMC
+      --verbose,  -v   Print out additional output
+  
+    For this command, the bay and rce portions of <rce_address> are ignored
+
+  @section COB Cold Data Reset
+  @code
+  cob_cold_data_reset <rce address> [<rce_address> ...]
+  @endcode
+  Send a Cold Data Reset command to a COB.
+ 
+  This command causes the same effect as physically removing the 
+  COB from the slot except that Management Power is not removed.
+  Upon receiving this command, the IPMC will remove payload power
+  from all bays, clear all internal cached state informaion which
+  includes all Shelf IP Information and the Shelf Name, and then
+  resets the IPMC itself. If the conditions for activation are
+  satisfied (handle switch closed) the COB will proceed normally
+  exactly as if it had just been inserted in the shelf.
+ 
+  If you are just looking to refresh the cached Shelf information
+  in the IPMC, consider using the cob_refresh_shelf_info command.
+ 
+  For this command, the bay and rce portions of <rce_address> are ignored
+ 
+  @section COB Initialize a new RTM
+  @code
+  cob_rtm_init [OPTIONS] <rce_address> [<rce_address> ...]
+  @endcode
+  Initialize the FRU information EEPROM on an RTM.
+ 
+  Where the OPTIONS are:
+ 
+    -f, --file=FILE The binary file containing the FRU information
+                    In order for the ID PROM and Asset Tags to be
+                    filled both fields should be initialized with
+                    8 and 32 bytes of zeros respectively.
+ 
+    -t, --tag=TAG   The Asset Tag is a NULL terminated ASCII string
+                    of up to 24 bytes. It is intended to be a human
+                    readable unique identifier which can be used 
+                    for inventory control. If there is a label on
+                    the board, the asset tag should match that label
+ 
+    -s, --serial    When this flag is used, the serial number is
+                    read from the ID PROM and written into the 
+                    FRU Information.
+ 
+    -v, --verbose   Additional output
+ 
+   When the --serial option is specified, the contents of the ID 
+   prom will be written into the Serial Number fields in the FRU 
+   information. If the --tag option is specified, the Asset Tag 
+   field of the FRU Information will be filled. If the --file
+   option is used without the --tag option, the tag will be NULL
+   If the --tag or --serial options are used without the --file 
+   option, the contents of the FRU information in the RTM EEPROM 
+   must be the correct length already.
+ 
+   Obviously, one probably shouldn't use the --tag option when
+   addressing multiple slots. (Unless those slots share an asset 
+   tag, in which case shame on you!)
+ 
+   For this command, the bay and rce portions of <rce_address> are ignored
+ 
+  @section COB Initialize a new RMB 
+  @code
+  cob_rmb_init [OPTIONS] <rce_address> [<rce_address> ...]
+  @endcode
+  Initialize the Power and Type information in the RMB EEPROM
+ 
+  Where the OPTIONS are:
+ 
+    -p, --power=WATTS The power used by the RMB in Watts
+ 
+    -t, --type=TYPE   The RMB type
+ 
+    -v, --verbose     Additional output
+ 
+   For this command, the bay and rce portions of <rce_address> are ignored
+
+  @section COB Raw Command
+  @code
+  cob_raw_cmd [OPTIONS] <rce_address> [<rce_address> ...]
+  @endcode
+  Send a raw IPMI command to one or more COBs.
+ 
+  Where the OPTIONS are:
+ 
+    -n, --netfn=NETFN The netFn for the command
+ 
+    -c, --cmd=CMD     The command index
+ 
+    -d, --data=DATA    The data to send as a list of bytes. 
+                       If more than one byte is sent, the bytes 
+                       should be enclosed in quotes
+ 
+    -v, --verbose   Additional output
+ 
+  This command can be used to send a raw IPMI command to one or 
+  more COBs, any data returned will be printed to the stdout 
+  Specifying more than one <rce_address> or a composite 
+  <rce_address> will result in multiple lines of output
+
+  NOTE: This is a pretty low-level debugging command, if you 
+        find yourself needing to use this routinely, let us know.
+	That indicates that there is missing functionality in our
+	support API.
+ 
+  @section COB remove RCEs from "Zombie" state
+  @code
+  cob_rce_clr_zombie [-v] <rce address> [<rce_address> ...]
+  @endcode
+  Clear Zombie state for RCE(s)
+ 
+  When in the Zombie state, the IPMC ignores the RCE. Which is to
+  say, it doesn't respond to changes in the Done state of the FPGS
+  or the absence of the BSI. 
+ 
+  NOTE: The COB will not light the green front panel LED if any 
+        RCEs are in the Zombie state
+ 
+  @section COB put RCEs in "Zombie" state
+  @code
+  cob_rce_set_zombie [-v] <rce address> [<rce_address> ...]
+  @endcode
+  Set Zombie state for RCE(s)
+  When in the Zombie state, the IPMC ignores the RCE. Which is to
+  say, it doesn't respond to changes in the Done state of the FPGS
+  or the absence of the BSI. 
+ 
+  NOTE: The COB will not light the green front panel LED if any 
+        RCEs are in the Zombie state
+ 
+  @section COB IPMC API
+  There is a simple API which allows programmatic access to the 
+  state of all the RCEs in a shelf and the ability to reset sets
+  of them. 
+
+*/
