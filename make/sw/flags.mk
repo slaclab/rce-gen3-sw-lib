@@ -408,16 +408,16 @@ XLINK_ENV := /bin/env -u LD_LIBRARY_PATH
 
 # ARM Xilinx Linux specific targets
 ifeq ($(tgt_cpu_family)-$(tgt_os),arm-linux)
-  CROSS_COMPILE ?= arm-linux-gnueabihf	
-  AS  	   := arm-linux-gnueabihf-as
-  CPP 	   := arm-linux-gnueabihf-gcc -E
-  CC  	   := arm-linux-gnueabihf-gcc
-  CXX 	   := arm-linux-gnueabihf-g++
-  LD  	   := $(XLINK_ENV) arm-linux-gnueabihf-g++
-  LX  	   := $(XLINK_ENV) arm-linux-gnueabihf-g++
-  OBJCOPY  := arm-linux-gnueabihf-objcopy
-  OBJDUMP  := arm-linux-gnueabihf-objdump
-  STRIP    := arm-linux-gnueabihf-strip
+  CROSS_COMPILE ?= arm-linux-gnueabihf-	
+  AS  	   := $(CROSS_COMPILE)as
+  CPP 	   := $(CROSS_COMPILE)gcc -E
+  CC  	   := $(CROSS_COMPILE)gcc
+  CXX 	   := $(CROSS_COMPILE)g++
+  LD  	   := $(XLINK_ENV) $(CROSS_COMPILE)g++
+  LX  	   := $(XLINK_ENV) $(CROSS_COMPILE)g++
+  OBJCOPY  := $(CROSS_COMPILE)objcopy
+  OBJDUMP  := $(CROSS_COMPILE)objdump
+  STRIP    := $(CROSS_COMPILE)strip
 
   LIBEXTNS  = so
   DEPFLAGS  = -MM
@@ -551,7 +551,7 @@ ifeq ($(tgt_os),eabi)
 
 # Zynq FPGA specific targets (no OS and no modules)
 ifeq ($(tgt_cpu_family),arm)
-  CROSS_COMPILE ?=arm-xilinx-eabi
+  CROSS_COMPILE ?=arm-xilinx-eabi-
   tool_suite := $(CROSS_COMPILE)
 
   BOOTGEN  := bootgen
@@ -561,16 +561,16 @@ ifeq ($(tgt_cpu_family),arm)
   CFLAGS   += -fPIC -Wno-psabi
 endif
 
-  AS  	   := $(tool_suite)-as
-  CPP 	   := $(tool_suite)-cpp
-  CC  	   := $(tool_suite)-gcc
-  CXX 	   := $(tool_suite)-g++
-  LD  	   := $(tool_suite)-ld
-  LX  	   := $(tool_suite)-g++
-  OBJCOPY  := $(tool_suite)-objcopy
-  OBJDUMP  := $(tool_suite)-objdump
-  SIZE     := $(tool_suite)-size
-  STRIP    := $(tool_suite)-strip
+  AS  	   := $(tool_suite)as
+  CPP 	   := $(tool_suite)cpp
+  CC  	   := $(tool_suite)gcc
+  CXX 	   := $(tool_suite)g++
+  LD  	   := $(tool_suite)ld
+  LX  	   := $(tool_suite)g++
+  OBJCOPY  := $(tool_suite)objcopy
+  OBJDUMP  := $(tool_suite)objdump
+  SIZE     := $(tool_suite)size
+  STRIP    := $(tool_suite)strip
 
   LIBEXTNS  = a
   DEPFLAGS  = -MM
