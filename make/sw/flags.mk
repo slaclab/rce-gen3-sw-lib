@@ -408,6 +408,7 @@ XLINK_ENV := /bin/env -u LD_LIBRARY_PATH
 
 # ARM Xilinx Linux specific targets
 ifeq ($(tgt_cpu_family)-$(tgt_os),arm-linux)
+  CROSS_COMPILE ?= arm-linux-gnueabihf	
   AS  	   := arm-linux-gnueabihf-as
   CPP 	   := arm-linux-gnueabihf-gcc -E
   CC  	   := arm-linux-gnueabihf-gcc
@@ -432,8 +433,13 @@ ifeq ($(tgt_cpu_family)-$(tgt_os),arm-linux)
   # installed as a target system library. -rpath-link doesn't
   # modify the executable so those that don't use Pth don't
   # know what they're missing.
+ifneq ($(PTH_VERSION),)
   PTH_INCLUDE_DIR := $(PTH_ROOT)/v$(PTH_VERSION)-$(tgt_cpu_model)/include
   PTH_LIB_DIR     := $(PTH_ROOT)/v$(PTH_VERSION)-$(tgt_cpu_model)/lib
+else
+  PTH_INCLUDE_DIR := $(PTH_ROOT)/include
+  PTH_LIB_DIR     := $(PTH_ROOT)/lib
+endif
   PTH_LIBSLIB     := $(PTH_LIB_DIR)/pth
   LXFLAGS   = -lpthread -lrt -ldl -Wl,-rpath-link,$(PTH_LIB_DIR)
 endif
@@ -545,7 +551,8 @@ ifeq ($(tgt_os),eabi)
 
 # Zynq FPGA specific targets (no OS and no modules)
 ifeq ($(tgt_cpu_family),arm)
-  tool_suite := arm-xilinx-eabi
+  CROSS_COMPILE ?=arm-xilinx-eabi
+  tool_suite := $(CROSS_COMPILE)
 
   BOOTGEN  := bootgen
 

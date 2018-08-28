@@ -1,10 +1,10 @@
 projects :=
-projects += xilinx
-projects += bootstrap
+#projects += xilinx
+#projects += bootstrap
 projects += platform
 projects += tool
-projects += driver
+#projects += driver
 projects += service
-projects += ppi
+#projects += ppi
 projects += configuration
 projects += cm

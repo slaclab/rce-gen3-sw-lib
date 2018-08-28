@@ -23,7 +23,8 @@ objs := one.exe two.so three.so four.so five.so six.so
 
 binobjs := $(foreach ob,$(objs),$(bindir)/$(ob))
 
-command := arm-xilinx-linux-gnueabi-gcc -shared -nostartfiles -nostdlib -Ttest/linux/testobj.ld -Wl,-zcombreloc,--hash-style=gnu,-zmax-page-size=4096,-zdefs -fno-builtin -fPIC -I $(incfarm) -DEXPORT=""
+CROSS_COMPILE ?= arm-xilinx-linux-
+command := $(CROSS_COMPILE)gcc -shared -nostartfiles -nostdlib -Ttest/linux/testobj.ld -Wl,-zcombreloc,--hash-style=gnu,-zmax-page-size=4096,-zdefs -fno-builtin -fPIC -I $(incfarm) -DEXPORT=""
 
 # Append additional dependencies to the global "bin" and "clean" targets.
 bin: $(binobjs)
