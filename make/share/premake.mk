@@ -13,7 +13,7 @@ Makefile:;
 # -------
 # To be sure there is one, and only one, `-f Makefile' option
 MAKE := $(filter-out -f Makefile, $(MAKE)) -f Makefile
-PYTHON := /usr/local/bin/python
+PYTHON := /usr/bin/env python
 
 # Define the make targets in terms of the architectures requested.
 # Normally, the user will type "make all", but in some cases the user

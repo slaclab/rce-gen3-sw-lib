@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # Defines a class which parses a standard DAT architecture string
 # and creates an object which is used in generating link farms for
 # include and/or source files

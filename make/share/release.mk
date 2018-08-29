@@ -71,7 +71,7 @@ $(tree_dirs):
 include: dir
 	@echo "[IF] Top level include farm"
 	for arch in $(architectures); do \
-	  /usr/local/bin/python make/tools/includeFarm.py --arch=$$arch \
+	  /usr/bin/env python make/tools/includeFarm.py --arch=$$arch \
 	     --dest=build/$$arch/include/core; \
 	done;
 

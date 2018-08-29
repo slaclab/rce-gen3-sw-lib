@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 # Create a bunch of soft links of files into an include farm
 #
 # Directory structure
