@@ -580,7 +580,7 @@ endif
   CXXFLAGS  = $(CFLAGS)
   CASFLAGS  = -x assembler-with-cpp
   LDFLAGS   = -r
-  LXFLAGS   = -fno-builtin -nostartfiles -nodefaultlibs -mcpu=$(tgt_cpu) $(tgt_flt)
+  LXFLAGS   = -fshort-enum -fno-builtin -nostartfiles -nodefaultlibs -mcpu=$(tgt_cpu) $(tgt_flt)
 endif
 
 
