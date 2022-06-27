@@ -81,9 +81,9 @@ def mkLink(src, dest):
         os.makedirs(os.path.dirname(dest))
     try:
         os.symlink(src, dest)
-    except OSError, e:
+    except OSError as e:
         if e.errno == errno.EEXIST: return
-        print e, src, dest
+        print(e, src, dest)
         return
     #print "Created link %s -> %s" % (dest, src)
 

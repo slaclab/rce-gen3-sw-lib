@@ -1,0 +1,9 @@
+add_library(memory
+src/Arena.cc
+src/FreeList.cc
+)
+include_directories(
+.
+../debug
+../container
+)

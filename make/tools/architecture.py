@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     for arch in arches:
         a= Architecture(arch)
-        print "Arch: %s" % a
-        print "   brd:%s  cpu:%s  fam:%s  gen:%s  os:%s  plat:%s" % \
-            (a.board, a.cpuModel, a.family, a.generation, a.os, a.platform)
+        print("Arch: %s" % a)
+        print("   brd:%s  cpu:%s  fam:%s  gen:%s  os:%s  plat:%s" % \
+            (a.board, a.cpuModel, a.family, a.generation, a.os, a.platform))
 
