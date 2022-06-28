@@ -1,2 +1,2 @@
-add_library(Type INTERFACE)
-target_include_directories(Type INTERFACE .)
+add_library(type INTERFACE)
+target_include_directories(type INTERFACE .)

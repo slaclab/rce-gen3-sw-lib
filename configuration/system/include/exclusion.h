@@ -45,6 +45,8 @@ SLAC
 #if !defined(SYSTEM_CONFIGURATION_EXCLUSION_H)
 #define      SYSTEM_CONFIGURATION_EXCLUSION_H
 
-#include "system/family/exclusion.h"
+#ifdef __arm__
+#include "system/arm/exclusion.h"
+#endif
 
 #endif

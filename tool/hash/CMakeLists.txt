@@ -1,4 +1,4 @@
 add_library(hash
 src/Hash.c
 )
-include_directories(.)
+target_include_directories(hash PUBLIC .)

@@ -138,6 +138,8 @@ void mem_Region_printConfig(void (*printFunction)(const char* fmt, ...));
 } // extern "C"
 #endif
 
-#include "memory/cpu/memFlags-inl.h"
+#ifdef __arm__
+#include "memory/armCA9/memFlags-inl.h"
+#endif
 
 #endif

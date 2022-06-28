@@ -1,4 +1,4 @@
 add_library(time
 src/Time.cc
 )
-include_directories(.)
+target_include_directories(time PUBLIC .)

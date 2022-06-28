@@ -1,4 +1,4 @@
-add_library(debug
-src/linux/print.c
+add_library(Debug
+  src/linux/print.c
 )
-include_directories(.)
+target_include_directories(Debug PUBLIC .)

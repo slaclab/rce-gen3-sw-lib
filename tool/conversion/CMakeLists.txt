@@ -1,4 +1,4 @@
 add_library(conversion
 src/BSWP.cc
 )
-include_directories(.)
+target_include_directories(conversion PUBLIC .)

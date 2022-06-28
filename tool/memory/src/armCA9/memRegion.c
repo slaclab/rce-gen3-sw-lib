@@ -33,10 +33,11 @@ SLAC
 
 
 #include "memory/mem.h"
-#include "memory/cpu/memConstants.h"
-#include "memory/cpu/memRegion.h"
-#include "memory/cpu/memRegionConstants.h"
-
+#ifdef __arm__
+#include "memory/armCA9/memConstants.h"
+#include "memory/armCA9/memRegion.h"
+#include "memory/armCA9/memRegionConstants.h"
+#endif
 
 static mem_LayoutItem nullcatcherLayout[] = { {.pages = 0, .flags = MEM_RESERVED} };
 

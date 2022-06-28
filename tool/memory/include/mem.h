@@ -13,6 +13,7 @@
 */
 
 
-
-#include "memory/cpu/mem.h"
-#include "memory/platform/mem.h"
+#ifdef __arm__
+#include "memory/armCA9/mem.h"
+#endif
+//#include "memory/platform/mem.h"

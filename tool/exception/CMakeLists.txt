@@ -1,8 +1,6 @@
-add_library(Exception
+add_library(exception
         src/Exception.cc
         src/Exceptions.cc
         )
-include_directories(
-        .
-        ../../service/logger
-        )
+target_link_libraries(exception logger)
+target_include_directories(exception PUBLIC .)

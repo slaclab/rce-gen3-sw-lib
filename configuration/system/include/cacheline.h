@@ -38,6 +38,8 @@ SLAC
 #if !defined(SYSTEM_CONFIGURATION_CACHELINE_H)
 #define      SYSTEM_CONFIGURATION_CACHELINE_H
 
-#include "system/family/cacheline.h"
+#ifdef __arm__
+#include "system/arm/cacheline.h"
+#endif
 
 #endif

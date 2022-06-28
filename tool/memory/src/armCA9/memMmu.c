@@ -40,10 +40,12 @@ SLAC
 #include "debug/print.h"
 #include "memory/mem.h"
 
-#include "memory/cpu/memConstants.h"
-#include "memory/cpu/memRegion.h"
-#include "memory/cpu/memRegionConstants.h"
-#include "memory/cpu/memTest.h"
+#ifdef __arm__
+#include "memory/armCA9/memConstants.h"
+#include "memory/armCA9/memRegion.h"
+#include "memory/armCA9/memRegionConstants.h"
+#include "memory/armCA9/memTest.h"
+#endif
 
 /* Assumptions this code makes about the MMU translation table:
 

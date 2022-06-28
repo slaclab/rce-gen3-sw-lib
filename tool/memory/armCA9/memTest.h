@@ -13,8 +13,9 @@
 #if !defined(TOOL_MEMORY_MEMTEST_H)
 #define      TOOL_MEMORY_MEMTEST_H
 
-
-#include "memory/cpu/memRegion.h"
+#ifdef __arm__
+#include "memory/armCA9/memRegion.h"
+#endif
 
 /* @brief Call the MMU table setup function directly.
 

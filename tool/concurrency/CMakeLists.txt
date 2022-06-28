@@ -1,4 +1,4 @@
-add_library(Concurrency
+add_library(concurrency
         src/SemaphoreGuard.cc
         src/Thread.cc
         src/linux/Notepad.cc
@@ -6,5 +6,5 @@ add_library(Concurrency
         src/linux/Sleep.cc
         src/linux/Thread.cc
         )
-include_directories(. ../exception ../type ../../service/logger)
-link_libraries(Concurrency Exception pth)
+target_link_libraries(concurrency exception type logger pth)
+target_include_directories(concurrency PUBLIC .)

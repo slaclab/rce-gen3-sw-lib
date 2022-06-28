@@ -38,7 +38,9 @@ SLAC
 
 
 #include "memory/mem.h"
-#include "memory/cpu/memConstants.h"
+#ifdef __arm__
+#include "memory/armCA9/memConstants.h"
+#endif
 
 static inline uint32_t lineFloor(uint32_t virt) {return (uint32_t)virt & CACHE_LINE_MASK;}
 

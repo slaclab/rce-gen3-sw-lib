@@ -6,12 +6,5 @@ add_library(logger
         src/SyslogLogger.cc
         src/linux/StderrLogger.cc
         )
-target_link_libraries(logger Type Concurrency)
-include_directories(
-        .
-        ../../tool/type
-        ../../tool/exception
-        ../../tool/string
-        ../../tool/concurrency
-        ../../tool/io
-        )
+target_link_libraries(logger exception concurrency string io)
+target_include_directories(logger PUBLIC .)

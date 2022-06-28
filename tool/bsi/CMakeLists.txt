@@ -1,0 +1,5 @@
+if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm" )
+add_library(bsi INTERFACE)
+target_include_directories(bsi INTERFACE .)
+target_link_libraries(bsi INTERFACE map)
+endif()

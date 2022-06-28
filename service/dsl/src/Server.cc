@@ -27,8 +27,8 @@
 #include "dsl/impl/Request.hh"
 #include "dsl/impl/Response.hh"
 
-#include "elf/linker.h"
-#include "memory/mem.h"
+//#include "elf/linker.h"
+//#include "memory/mem.h"
 #include "kvt/Kvt.h"
 //#include "elf/linker.h"          
 //#include "ldr/Ldr.h"             
@@ -66,7 +66,7 @@ using namespace service::dsl;
 
 const char* SERVER_MAGIC_COOKIE = "$$MAGIC_COOKIE$$";
 
-int lnk_options __attribute__((visibility("default"))) =  LNK_INSTALL;
+//int lnk_options __attribute__((visibility("default"))) =  LNK_INSTALL;
 
 /*
 ** ++
