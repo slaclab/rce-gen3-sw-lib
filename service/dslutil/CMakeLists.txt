@@ -1,4 +1,4 @@
-if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm" )
+if( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm*" )
 list(APPEND rce_libs
 	 src/reboot_init.cc
          src/update_init.cc

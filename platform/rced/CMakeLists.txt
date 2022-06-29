@@ -1,4 +1,4 @@
-if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm" )
+if( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm*" )
 
 list (APPEND libs 
 	csi 

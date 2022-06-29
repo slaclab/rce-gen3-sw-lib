@@ -16,7 +16,7 @@ list(APPEND libs
 	pthread
 	)
 
-if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm" )
+if( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm*" )
 set(rce_libs mem map)
 endif()
 
@@ -35,7 +35,7 @@ target_link_libraries(shelf_ping ${libs} ${rce_libs})
 add_executable(remote_service src/remote_service.cc)
 target_link_libraries(remote_service atca_l ${libs} ${rce_libs})
 
-if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm" )
+if( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm*" )
 add_executable(atca_server src/atca_server.cc)
 target_link_libraries(atca_server ${libs} ${rce_libs})
 

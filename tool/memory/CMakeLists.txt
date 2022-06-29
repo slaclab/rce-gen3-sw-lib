@@ -5,7 +5,7 @@ add_library(memory
 target_include_directories(memory PUBLIC .)
 target_link_libraries(memory Debug container)
 
-if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm" )
+if( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm*" )
 
 add_library(mem
   src/armCA9/memRegion.c

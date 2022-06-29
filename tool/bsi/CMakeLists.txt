@@ -1,4 +1,4 @@
-if( "${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm" )
+if( "${CMAKE_SYSTEM_PROCESSOR}" MATCHES "arm*" )
 add_library(bsi INTERFACE)
 target_include_directories(bsi INTERFACE .)
 target_link_libraries(bsi INTERFACE map)
