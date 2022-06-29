@@ -44,3 +44,4 @@ target_link_libraries(dsl_identify dslutil)
 #add_executable(dsl_update src/armCA9-linux/dsl_update.cc) #arm
 add_executable(dsl_update src/i86-linux/dsl_update.cc)
 target_link_libraries(dsl_update dslutil)
+install(TARGETS dsl_reboot dsl_identify dsl_update DESTINATION bin)

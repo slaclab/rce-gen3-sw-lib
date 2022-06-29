@@ -29,3 +29,17 @@ add_executable(cob_dump  src/COB_dump.c src/cob_dump.c)
 target_link_libraries(cob_dump cob_ipmc)
 add_executable(cob_dump_bsi  src/COB_dump_bsi.c src/cob_dump_bsi.c)
 target_link_libraries(cob_dump_bsi cob_ipmc)
+
+install(TARGETS
+	cob_rce_reset
+        cob_refresh_shelf_info
+        cob_rtm_init
+        cob_fru_init
+        cob_raw_cmd
+        cob_rmb_init
+        cob_cold_data_reset
+        cob_rce_set_zombie
+        cob_rce_clr_zombie
+        cob_dump
+        cob_dump_bsi
+	DESTINATION bin)

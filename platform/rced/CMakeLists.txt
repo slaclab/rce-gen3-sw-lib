@@ -17,5 +17,7 @@ target_link_libraries(rced ${libs})
 
 add_executable(sysinfo src/rced.cc)
 target_link_libraries(sysinfo ${libs})
+install(TARGETS rced DESTINATION sbin)
+install(TARGETS sysinfo DESTINATION bin)
 endif()
 

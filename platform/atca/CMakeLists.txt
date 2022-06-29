@@ -41,10 +41,11 @@ target_link_libraries(atca_server ${libs} ${rce_libs})
 
 add_executable(shelf_ping_server src/shelf_ping_server.cc)
 target_link_libraries(shelf_ping_server atca_l ${libs} ${rce_libs})
-
+install(TARGETS atca_ip atca_mac atca_dump shelf_ping remote_service DESTINATION bin)
 
 add_executable(remote_server src/remote_server.cc)
 target_link_libraries(remote_server ${libs} ${rce_libs})
+install(TARGETS atca_server shelf_ping_server remote_server  DESTINATION sbin)
 endif()
 
 
