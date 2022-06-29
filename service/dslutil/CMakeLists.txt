@@ -3,7 +3,16 @@ list(APPEND rce_libs
 	 src/reboot_init.cc
          src/update_init.cc
          src/id_init.cc
+         src/armCA9-linux/RebootSpace.cc
+         src/armCA9-linux/UpdateSpace.cc
+         src/armCA9-linux/IdSpace.cc
 	 )
+else()
+list(APPEND rce_libs
+  src/i86-linux/RebootSpace.cc
+  src/i86-linux/UpdateSpace.cc
+  src/i86-linux/IdSpace.cc
+  )
 endif()
 
 add_library(dslutil
@@ -20,9 +29,6 @@ src/IdListener.cc
 src/IdSpace.cc
 src/AddressStar.cc
 src/Base.cc
-src/i86-linux/RebootSpace.cc
-src/i86-linux/UpdateSpace.cc
-src/i86-linux/IdSpace.cc
 ${rce_libs}
 )
 
